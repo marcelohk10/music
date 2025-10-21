@@ -96,6 +96,8 @@
             color: #b3b3b3;
             margin: 5px 0 0 0;
         }
+
+        /* Seção de Plataformas de Streaming */
         #links-container {
             display: flex;
             flex-direction: column;
@@ -124,14 +126,53 @@
             font-size: 0.8em;
         }
         
-        /* Cores das plataformas (sem Claro Música) */
+        /* Cores das plataformas */
         .spotify .platform-name::before { color: #1DB954; }
         .appleMusic .platform-name::before { color: #FA58D8; }
         .deezer .platform-name::before { color: #FEAA2D; }
         .youtubeMusic .platform-name::before { color: #FF0000; }
         .amazonMusic .platform-name::before { color: #00A8E1; }
         .soundCloud .platform-name::before { color: #FF5500; }
+        .tiktokMusic .platform-name::before { color: #FF0050; } /* Cor do TikTok */
         .tidal .platform-name::before { color: #00ffff; }
+
+        /* --- NOVO CSS PARA SEÇÃO SOCIAL --- */
+        #social-links-container {
+            padding: 20px 25px;
+            background-color: #191919;
+            border-top: 1px solid #282828;
+        }
+        #social-links-container h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: left;
+            color: #b3b3b3;
+            font-size: 1em;
+            text-transform: uppercase;
+        }
+        .social-button {
+            display: block;
+            padding: 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
+        .social-button:hover {
+            opacity: 0.8;
+        }
+        .tiktok-button {
+            background-color: #000000; /* Preto TikTok */
+            border: 1px solid #FF0050;
+        }
+        .instagram-button {
+            /* Gradiente do Instagram */
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+        /* --- FIM DO NOVO CSS --- */
         
     </style>
 </head>
@@ -152,9 +193,15 @@
                 <h2 id="song-title"></h2>
                 <p id="song-artist"></p>
             </div>
+            
             <div id="links-container">
                 </div>
             
+            <div id="social-links-container">
+                <h3>Usar esta música em seu post</h3>
+                <div id="social-buttons">
+                    </div>
+            </div>
         </div>
     </div>
 
@@ -170,6 +217,7 @@
         const songTitle = document.getElementById('song-title');
         const songArtist = document.getElementById('song-artist');
         const linksContainer = document.getElementById('links-container');
+        const socialButtonsContainer = document.getElementById('social-buttons'); // Container dos botões sociais
         
         const searchBox = document.getElementById('search-box');
 
@@ -181,11 +229,9 @@
             const musicaDaUrl = params.get('musica');
 
             if (artistaDaUrl && musicaDaUrl) {
-                // Se veio da URL, ESCONDE a caixa de busca
                 if (searchBox) {
                     searchBox.style.display = 'none';
                 }
-                
                 artistInput.value = artistaDaUrl;
                 songInput.value = musicaDaUrl;
                 searchButton.click();
@@ -224,18 +270,19 @@
 
             resultsContainer.style.display = 'none';
             linksContainer.innerHTML = ''; 
+            socialButtonsContainer.innerHTML = ''; // Limpa botões sociais
             
             const query = `${artist} ${song}`;
 
-            // --- LISTA DE PLATAFORMAS ATUALIZADA (SEM CLARO MÚSICA) ---
+            // --- LISTA DE PLATAFORMAS DE STREAMING ATUALIZADA ---
             const platformsToCreate = [
                 { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, class: 'spotify' },
                 { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, class: 'youtubeMusic' },
+                { name: 'TikTok Music', url: `https://music.tiktok.com/search/music?q=${encodeURIComponent(query)}`, class: 'tiktokMusic' }, // NOVO
                 { name: 'Amazon Music', url: `https://music.amazon.com.br/search/${encodeURIComponent(query)}`, class: 'amazonMusic' },
                 { name: 'SoundCloud', url: `https://soundcloud.com/search/sounds?q=${encodeURIComponent(query)}`, class: 'soundCloud' },
                 { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, class: 'tidal' }
             ];
-            // --- FIM DA ATUALIZAÇÃO ---
 
             try {
                 // 1. BUSCAR NO APPLE MUSIC
@@ -261,12 +308,28 @@
                     platformsToCreate.unshift({ name: 'Deezer', url: deezerData.link, class: 'deezer' });
                 }
 
-                // 3. CRIAR OS BOTÕES
+                // 3. CRIAR OS BOTÕES DE STREAMING
                 platformsToCreate.forEach((platform) => {
                     createLinkButton(platform.name, platform.url, platform.class, query);
                 });
 
-                // 4. EXIBIR TUDO
+                // 4. CRIAR OS BOTÕES SOCIAIS
+                // Link de busca de SOM no TikTok
+                createSocialButton(
+                    'Usar Som no TikTok', 
+                    `https://www.tiktok.com/search/sounds?q=${encodeURIComponent(query)}`, 
+                    'tiktok-button', 
+                    query
+                );
+                // Link de busca de HASHTAG no Instagram
+                createSocialButton(
+                    'Procurar no Instagram', 
+                    `https://www.instagram.com/explore/tags/${encodeURIComponent(query.replace(/\s/g, ''))}/`, // Instagram não gosta de espaços em hashtags
+                    'instagram-button', 
+                    query
+                );
+
+                // 5. EXIBIR TUDO
                 resultsContainer.style.display = 'block';
 
             } catch (error) {
@@ -277,7 +340,7 @@
             }
         }
 
-        // Função que cria os botões na tela
+        // Função que cria os botões de STREAMING
         function createLinkButton(platformName, url, platformClass, songQuery) {
             const button = document.createElement('a');
             button.href = url;
@@ -295,6 +358,23 @@
             });
 
             linksContainer.appendChild(button);
+        }
+
+        // --- NOVA FUNÇÃO ---
+        // Função que cria os botões SOCIAIS
+        function createSocialButton(text, url, cssClass, songQuery) {
+            const button = document.createElement('a');
+            button.href = url;
+            button.target = '_blank';
+            button.className = 'social-button ' + cssClass;
+            button.innerText = text;
+            
+            button.addEventListener('click', (e) => {
+                // Também rastreia o clique no Google Analytics
+                trackClick(text, songQuery);
+            });
+
+            socialButtonsContainer.appendChild(button);
         }
 
         // Função especial para buscar no Deezer (JSONP)
