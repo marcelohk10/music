@@ -124,23 +124,22 @@
             font-size: 0.8em;
         }
         
-        /* --- NOVO CSS AQUI --- */
+        /* Cores das plataformas */
         .spotify .platform-name::before { color: #1DB954; }
         .appleMusic .platform-name::before { color: #FA58D8; }
         .deezer .platform-name::before { color: #FEAA2D; }
         .youtubeMusic .platform-name::before { color: #FF0000; }
-        .amazonMusic .platform-name::before { color: #00A8E1; } /* Cor do Amazon Music */
-        .soundCloud .platform-name::before { color: #FF5500; } /* Cor do SoundCloud */
-        .claroMusica .platform-name::before { color: #E50000; } /* Cor do Claro */
+        .amazonMusic .platform-name::before { color: #00A8E1; }
+        .soundCloud .platform-name::before { color: #FF5500; }
+        .claroMusica .platform-name::before { color: #E50000; }
         .tidal .platform-name::before { color: #00ffff; }
-        /* --- FIM DO NOVO CSS --- */
         
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="search-box">
+        <div class="search-box" id="search-box">
             <h1 style="margin-top: 0;">Links de Música</h1>
             <input type="text" id="artist-input" placeholder="Nome do Artista">
             <input type="text" id="song-input" placeholder="Nome da Música">
@@ -172,6 +171,10 @@
         const songTitle = document.getElementById('song-title');
         const songArtist = document.getElementById('song-artist');
         const linksContainer = document.getElementById('links-container');
+        
+        // --- NOVIDADE AQUI ---
+        // Pega a caixa de busca inteira
+        const searchBox = document.getElementById('search-box');
 
         searchButton.addEventListener('click', searchMusic);
 
@@ -180,16 +183,25 @@
             const artistaDaUrl = params.get('artista');
             const musicaDaUrl = params.get('musica');
 
+            // --- LÓGICA ATUALIZADA AQUI ---
             if (artistaDaUrl && musicaDaUrl) {
+                // Se veio da URL, ESCONDE a caixa de busca
+                if (searchBox) {
+                    searchBox.style.display = 'none';
+                }
+                
+                // Preenche os campos (mesmo escondidos) e clica no botão
                 artistInput.value = artistaDaUrl;
                 songInput.value = musicaDaUrl;
                 searchButton.click();
             }
+            // Se não veio da URL, não faz nada, e a caixa de busca
+            // continua visível por padrão.
+            // --- FIM DA ATUALIZAÇÃO ---
         });
 
         // --- FUNÇÃO DE CONTADOR (APENAS GOOGLE ANALYTICS) ---
 
-        // Registra o clique no Google Analytics
         function trackClick(platformName, songQuery) {
             console.log(`Clique rastreado para: ${platformName} (Música: ${songQuery})`);
             
@@ -203,7 +215,7 @@
             }
         }
         
-        // --- FUNÇÕES PRINCIPAIS ---
+        // --- FUNÇÕES PRINCIPAIS (COM MAIS PLATAFORMAS) ---
 
         async function searchMusic() {
             const artist = artistInput.value;
@@ -214,13 +226,17 @@
                 return;
             }
 
-            loadingMessage.style.display = 'block';
+            // Mostra a mensagem de "carregando"
+            if (searchBox.style.display === 'none') {
+                loadingMessage.style.display = 'block'; // Mostra o "buscando" se a caixa estiver oculta
+            }
+
             resultsContainer.style.display = 'none';
             linksContainer.innerHTML = ''; 
             
             const query = `${artist} ${song}`;
 
-            // --- LISTA DE PLATAFORMAS ATUALIZADA ---
+            // Lista de plataformas atualizada
             const platformsToCreate = [
                 { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, class: 'spotify' },
                 { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, class: 'youtubeMusic' },
@@ -229,7 +245,6 @@
                 { name: 'Claro Música', url: `https://www.claromusica.com/search/${encodeURIComponent(query)}`, class: 'claroMusica' },
                 { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, class: 'tidal' }
             ];
-            // --- FIM DA ATUALIZAÇÃO ---
 
             try {
                 // 1. BUSCAR NO APPLE MUSIC
@@ -242,7 +257,6 @@
                     artwork.style.display = 'block';
                     songTitle.innerText = track.trackName;
                     songArtist.innerText = track.artistName;
-                    // Adiciona Apple Music no topo da lista
                     platformsToCreate.unshift({ name: 'Apple Music', url: track.trackViewUrl, class: 'appleMusic' });
                 } else {
                     songTitle.innerText = song;
@@ -253,7 +267,6 @@
                 // 2. BUSCAR NO DEEZER (usa JSONP)
                 const deezerData = await searchDeezer(query);
                 if (deezerData) {
-                    // Adiciona Deezer no topo da lista
                     platformsToCreate.unshift({ name: 'Deezer', url: deezerData.link, class: 'deezer' });
                 }
 
@@ -269,6 +282,7 @@
                 console.error(error);
                 alert('Ocorreu um erro ao buscar. Tente novamente.');
             } finally {
+                // Esconde a mensagem de "carregando"
                 loadingMessage.style.display = 'none';
             }
         }
@@ -282,13 +296,11 @@
             button.dataset.platform = platformName; 
             button.dataset.class = platformClass;
 
-            // HTML do botão (simplificado, sem contador)
             button.innerHTML = `
                 <span class="platform-name">${platformName}</span>
             `;
             
             button.addEventListener('click', (e) => {
-                // Envia o clique para o Google Analytics
                 trackClick(platformName, songQuery);
             });
 
