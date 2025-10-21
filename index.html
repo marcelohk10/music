@@ -211,12 +211,11 @@
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO DO CONTADOR (PASSO 2) ---
+        // --- CONFIGURAÇÃO DO CONTADOR ---
         // Este é o seu "workspace" (espaço de trabalho) na API.
-        // Já está preenchido com o nome único que definimos.
         const API_WORKSPACE = 'marcelo-links-musicais-v1';
 
-        // *** NOVIDADE AQUI (PASSO 3) ***
+        // *** A MÁGICA ESTÁ AQUI ***
         // Inicializa a biblioteca de contador que carregamos no <head>
         const counter = new Counter({ workspace: API_WORKSPACE });
         // ------------------------------------
@@ -251,7 +250,7 @@
             }
         });
 
-        // --- FUNÇÕES DE CONTADOR (TOTALMENTE REESCRITAS) ---
+        // --- FUNÇÕES DE CONTADOR (Usando a Biblioteca Correta) ---
 
         // Pega o clique ATUAL da API
         async function getCount(platformName) {
@@ -259,15 +258,13 @@
                 // A chave é a música + plataforma
                 const key = `${currentSongKey}-${platformName.toLowerCase()}`;
                 
-                // *** NOVIDADE AQUI (PASSO 4) ***
-                // Usa a biblioteca "counter.get()" em vez de "fetch"
+                // Usa a biblioteca "counter.get()"
                 const result = await counter.get(key);
                 return result.value || 0;
 
             } catch (error) {
-                console.warn(`Erro ao buscar contagem para ${platformName}:`, error.message);
-                // A API da "counterapi" retorna erro se a chave não existir,
-                // então "pegar" o erro e retornar 0 é o esperado.
+                // É esperado um erro se a chave não existir.
+                console.warn(`Chave nova para ${platformName}, iniciando contagem do 0.`);
                 return 0;
             }
         }
@@ -278,14 +275,13 @@
                 // A chave é a música + plataforma
                 const key = `${currentSongKey}-${platformName.toLowerCase()}`;
                 
-                // *** NOVIDADE AQUI (PASSO 5) ***
-                // Usa a biblioteca "counter.up()" (subir) em vez de "fetch"
+                // Usa a biblioteca "counter.up()" (subir)
                 const result = await counter.up(key);
                 
-                // 2. Atualiza nosso objeto de contagem local
+                // Atualiza nosso objeto de contagem local
                 currentCounts[platformName] = result.value;
 
-                // 3. Atualiza a tela (Gráficos e Contadores)
+                // Atualiza a tela (Gráficos e Contadores)
                 updateDisplay();
 
             } catch (error) {
@@ -293,7 +289,7 @@
             }
         }
 
-        // Atualiza os números nos botões e redesenha os gráficos (Sem mudança aqui)
+        // Atualiza os números nos botões e redesenha os gráficos
         function updateDisplay() {
             const buttons = document.querySelectorAll('.music-platform-button');
             let maxClicks = 0;
@@ -357,7 +353,6 @@
             graphBarsContainer.innerHTML = '';
             
             const query = `${artist} ${song}`;
-            // Chave única para a música (ex: marcelo_hacker_xonada)
             currentSongKey = query.toLowerCase().replace(/[^a-z0-9]/g, '_'); 
             currentCounts = {}; 
 
@@ -432,11 +427,7 @@
             `;
             
             button.addEventListener('click', (e) => {
-                // Previne o clique, registra, e DEPOIS abre o link
-                // Isso é opcional, mas garante que o contador registre
-                // e.preventDefault(); 
                 trackClick(platformName);
-                // window.open(url, '_blank'); // Descomente isso se usar o preventDefault
             });
 
             linksContainer.appendChild(button);
