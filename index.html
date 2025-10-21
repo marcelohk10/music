@@ -210,8 +210,8 @@
 
     <script>
         // --- CONFIGURAÇÃO DO CONTADOR ---
-        // Este é o seu "workspace" (espaço de trabalho) na API.
-        const API_WORKSPACE = 'marcelo-links-musicais-v1';
+        // Usando o seu namespace único
+        const API_NAMESPACE = 'marcelohk10-links-musicais';
         // ------------------------------------
 
         // Pega os elementos do HTML
@@ -244,26 +244,38 @@
             }
         });
 
-        // --- FUNÇÕES DE CONTADOR (CORRIGIDAS PARA USAR O V1 da API) ---
+        // --- FUNÇÕES DE CONTADOR (REESCRITAS COM JSONP - Anti-CORS) ---
+        
+        // Função "mágica" para fazer chamadas JSONP
+        function jsonp(url, callbackName) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                // Define o que acontece quando o script carregar
+                window[callbackName] = (data) => {
+                    document.body.removeChild(script); // Limpa o script da página
+                    delete window[callbackName];      // Limpa a função global
+                    resolve(data); // Retorna os dados
+                };
+                
+                script.src = `${url}&callback=${callbackName}`;
+                script.onerror = reject;
+                document.body.appendChild(script);
+            });
+        }
 
         // Pega o clique ATUAL da API
         async function getCount(platformName) {
             try {
-                // A chave é a música + plataforma
                 const key = `${currentSongKey}-${platformName.toLowerCase()}`;
+                const url = `https://api.visitordata.io/v1/hits?ns=${API_NAMESPACE}&key=${key}`;
+                // O nome da função de callback é único para evitar conflitos
+                const callbackName = `cb_${platformName}_get`; 
                 
-                // *** CORREÇÃO AQUI: Usando fetch na API V1 ***
-                const response = await fetch(`https://api.counterapi.dev/get?ns=${API_WORKSPACE}&key=${key}`);
-                
-                if (!response.ok) {
-                   // Se a chave não existir, a API retorna um erro, então tratamos como 0
-                   return 0;
-                }
-                const data = await response.json();
+                const data = await jsonp(url, callbackName);
                 return data.value || 0;
 
             } catch (error) {
-                console.warn(`Erro ao buscar contagem (ou chave nova) para ${platformName}:`, error.message);
+                console.warn(`Erro ao buscar contagem para ${platformName}:`, error.message);
                 return 0; // Se falhar, retorna 0
             }
         }
@@ -271,12 +283,11 @@
         // Registra um NOVO clique na API
         async function trackClick(platformName) {
             try {
-                // A chave é a música + plataforma
                 const key = `${currentSongKey}-${platformName.toLowerCase()}`;
-                
-                // *** CORREÇÃO AQUI: Usando fetch na API V1 ***
-                const response = await fetch(`https://api.counterapi.dev/up?ns=${API_WORKSPACE}&key=${key}`);
-                const data = await response.json();
+                const url = `https://api.visitordata.io/v1/hits?ns=${API_NAMESPACE}&key=${key}&hit=true`;
+                const callbackName = `cb_${platformName}_hit`;
+
+                const data = await jsonp(url, callbackName);
                 
                 // Atualiza nosso objeto de contagem local
                 currentCounts[platformName] = data.value;
@@ -306,7 +317,7 @@
                 platforms.push({ 
                     name: platformName, 
                     clicks: clickCount, 
-                    class: button.dataset.class 
+                    class: button.dataset.class // Bug da "platformClass" corrigido aqui
                 });
                 if (clickCount > maxClicks) {
                     maxClicks = clickCount;
@@ -380,7 +391,7 @@
                     artwork.style.display = 'none';
                 }
 
-                // 2. BUSCAR NO DEEZER
+                // 2. BUSCAR NO DEEZER (usa JSONP)
                 const deezerData = await searchDeezer(query);
                 if (deezerData) {
                     platformsToCreate.unshift({ name: 'Deezer', url: deezerData.link, class: 'deezer' });
@@ -396,7 +407,8 @@
                 platformsToCreate.forEach((platform, index) => {
                     const count = counts[index];
                     currentCounts[platform.name] = count; 
-                    createLinkButton(platform.name, platform.url, platformClass, count);
+                    // Bug da "platformClass" corrigido aqui
+                    createLinkButton(platform.name, platform.url, platform.class, count);
                 });
 
                 // 5. EXIBIR TUDO
@@ -419,7 +431,7 @@
             button.target = '_blank';
             button.className = 'music-platform-button ' + platformClass;
             button.dataset.platform = platformName; 
-            button.dataset.class = platformClass;
+            button.dataset.class = platformClass; // Bug da "platformClass" corrigido aqui
 
             button.innerHTML = `
                 <span class="platform-name">${platformName}</span>
@@ -433,7 +445,7 @@
             linksContainer.appendChild(button);
         }
 
-        // Função especial para buscar no Deezer
+        // Função especial para buscar no Deezer (usa JSONP)
         function searchDeezer(query) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
