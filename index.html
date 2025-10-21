@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Links de Música (Contador Global)</title>
+    <title>Links de Música</title>
 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VQ0ZJ5JEY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-2VQ0ZJ5JEY');
+    </script>
     <style>
-        /* O CSS (estilo) é o mesmo */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #121212;
@@ -96,7 +103,7 @@
             background-color: #282828;
         }
         .music-platform-button {
-            display: flex;
+            display: flex; /* Mudei para flex */
             justify-content: space-between;
             align-items: center;
             padding: 18px;
@@ -121,64 +128,7 @@
         .deezer .platform-name::before { color: #FEAA2D; }
         .youtubeMusic .platform-name::before { color: #FF0000; }
         .tidal .platform-name::before { color: #00ffff; }
-        .click-counter {
-            font-size: 0.9em;
-            color: #b3b3b3;
-            font-weight: normal;
-            background-color: #282828;
-            padding: 3px 8px;
-            border-radius: 5px;
-        }
-        #graph-container {
-            padding: 25px;
-            border-top: 1px solid #282828;
-        }
-        #graph-container h3 {
-            margin-top: 0;
-            text-align: left;
-            color: #b3b3b3;
-            font-size: 1em;
-            text-transform: uppercase;
-        }
-        .graph-bar-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .graph-label {
-            color: #fff;
-            font-size: 0.9em;
-            width: 100px;
-            text-align: left;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .graph-bar-bg {
-            flex-grow: 1;
-            background-color: #333;
-            border-radius: 3px;
-            height: 20px;
-            overflow: hidden;
-        }
-        .graph-bar {
-            height: 100%;
-            background-color: #1DB954;
-            width: 0%;
-            transition: width 0.5s ease-out;
-            color: #121212;
-            font-size: 0.8em;
-            font-weight: bold;
-            line-height: 20px;
-            text-align: right;
-            padding-right: 5px;
-            box-sizing: border-box;
-        }
-        .graph-bar.spotify { background-color: #1DB954; }
-        .graph-bar.appleMusic { background-color: #FA58D8; }
-        .graph-bar.deezer { background-color: #FEAA2D; }
-        .graph-bar.youtubeMusic { background-color: #FF0000; }
-        .graph-bar.tidal { background-color: #00ffff; color: #121212;}
+        
     </style>
 </head>
 <body>
@@ -200,20 +150,11 @@
             </div>
             <div id="links-container">
                 </div>
-            <div id="graph-container">
-                <h3>Estatísticas de Cliques (Global)</h3>
-                <div id="graph-bars">
-                    </div>
-            </div>
+            
         </div>
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO DO CONTADOR ---
-        // Usando o seu namespace único
-        const API_NAMESPACE = 'marcelohk10-links-musicais';
-        // ------------------------------------
-
         // Pega os elementos do HTML
         const artistInput = document.getElementById('artist-input');
         const songInput = document.getElementById('song-input');
@@ -225,10 +166,6 @@
         const songTitle = document.getElementById('song-title');
         const songArtist = document.getElementById('song-artist');
         const linksContainer = document.getElementById('links-container');
-        const graphBarsContainer = document.getElementById('graph-bars');
-
-        let currentSongKey = ''; // Chave única para a música
-        let currentCounts = {}; // Objeto para guardar os cliques atuais
 
         searchButton.addEventListener('click', searchMusic);
 
@@ -244,112 +181,25 @@
             }
         });
 
-        // --- FUNÇÕES DE CONTADOR (REESCRITAS COM JSONP - Anti-CORS) ---
-        
-        // Função "mágica" para fazer chamadas JSONP
-        function jsonp(url, callbackName) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                // Define o que acontece quando o script carregar
-                window[callbackName] = (data) => {
-                    document.body.removeChild(script); // Limpa o script da página
-                    delete window[callbackName];      // Limpa a função global
-                    resolve(data); // Retorna os dados
-                };
-                
-                script.src = `${url}&callback=${callbackName}`;
-                script.onerror = reject;
-                document.body.appendChild(script);
-            });
-        }
+        // --- FUNÇÃO DE CONTADOR (APENAS GOOGLE ANALYTICS) ---
 
-        // Pega o clique ATUAL da API
-        async function getCount(platformName) {
-            try {
-                const key = `${currentSongKey}-${platformName.toLowerCase()}`;
-                // *** API NOVA (JSONP) ***
-                const url = `https://api.visitordata.io/v1/hits?ns=${API_NAMESPACE}&key=${key}`;
-                // O nome da função de callback é único para evitar conflitos
-                const callbackName = `cb_${platformName}_get`; 
-                
-                const data = await jsonp(url, callbackName);
-                return data.value || 0;
-
-            } catch (error) {
-                console.warn(`Erro ao buscar contagem para ${platformName}:`, error.message);
-                return 0; // Se falhar, retorna 0
-            }
-        }
-
-        // Registra um NOVO clique na API
-        async function trackClick(platformName) {
-            try {
-                const key = `${currentSongKey}-${platformName.toLowerCase()}`;
-                // *** API NOVA (JSONP) ***
-                const url = `https://api.visitordata.io/v1/hits?ns=${API_NAMESPACE}&key=${key}&hit=true`;
-                const callbackName = `cb_${platformName}_hit`;
-
-                const data = await jsonp(url, callbackName);
-                
-                // Atualiza nosso objeto de contagem local
-                currentCounts[platformName] = data.value;
-
-                // Atualiza a tela (Gráficos e Contadores)
-                updateDisplay();
-
-            } catch (error) {
-                console.error('Erro ao registrar clique:', error);
-            }
-        }
-
-        // Atualiza os números nos botões e redesenha os gráficos
-        function updateDisplay() {
-            const buttons = document.querySelectorAll('.music-platform-button');
-            let maxClicks = 0;
-            let platforms = [];
-
-            buttons.forEach(button => {
-                const platformName = button.dataset.platform;
-                const clickCount = currentCounts[platformName] || 0;
-                
-                const counterSpan = button.querySelector('.click-counter');
-                if (counterSpan) {
-                    counterSpan.innerText = `${clickCount} cliques`;
-                }
-                platforms.push({ 
-                    name: platformName, 
-                    clicks: clickCount, 
-                    class: button.dataset.class // Bug da "platformClass" corrigido aqui
-                });
-                if (clickCount > maxClicks) {
-                    maxClicks = clickCount;
-                }
-            });
-
-            graphBarsContainer.innerHTML = '';
+        // Registra o clique no Google Analytics
+        function trackClick(platformName, songQuery) {
+            console.log(`Clique rastreado para: ${platformName} (Música: ${songQuery})`);
             
-            if (maxClicks === 0) {
-                 graphBarsContainer.innerHTML = '<p style="font-size:0.9em; color:#b3b3b3; text-align:left;">Nenhum clique registrado.</p>';
-                 return;
+            // *** O GOOGLE ANALYTICS RASTREIA O CLIQUE AQUI ***
+            if (typeof gtag === 'function') {
+                gtag('event', 'click_plataforma', {
+                    'plataforma': platformName,
+                    'musica': songQuery
+                });
+            } else {
+                // Isso não deve acontecer, pois o script está no <head>
+                console.warn('Google Analytics (gtag) não encontrado.');
             }
-
-            platforms.forEach(platform => {
-                const barWidth = maxClicks > 0 ? (platform.clicks / maxClicks) * 100 : 0;
-                const barHTML = `
-                    <div class="graph-bar-container">
-                        <div class="graph-label">${platform.name}</div>
-                        <div class="graph-bar-bg">
-                            <div class="graph-bar ${platform.class}" style="width: ${barWidth}%;">
-                                ${platform.clicks > 0 ? platform.clicks : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                graphBarsContainer.innerHTML += barHTML;
-            });
         }
         
-        // --- FUNÇÕES PRINCIPAIS (Sem mudança aqui) ---
+        // --- FUNÇÕES PRINCIPAIS ---
 
         async function searchMusic() {
             const artist = artistInput.value;
@@ -363,11 +213,8 @@
             loadingMessage.style.display = 'block';
             resultsContainer.style.display = 'none';
             linksContainer.innerHTML = ''; 
-            graphBarsContainer.innerHTML = '';
             
             const query = `${artist} ${song}`;
-            currentSongKey = query.toLowerCase().replace(/[^a-z0-9]/g, '_'); 
-            currentCounts = {}; 
 
             const platformsToCreate = [
                 { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, class: 'spotify' },
@@ -399,55 +246,45 @@
                     platformsToCreate.unshift({ name: 'Deezer', url: deezerData.link, class: 'deezer' });
                 }
 
-                // 3. BUSCAR TODAS AS CONTAGENS DA API (em paralelo)
-                loadingMessage.innerText = 'Buscando contadores...';
-                
-                const countPromises = platformsToCreate.map(platform => getCount(platform.name));
-                const counts = await Promise.all(countPromises);
-                
-                // 4. CRIAR OS BOTÕES
-                platformsToCreate.forEach((platform, index) => {
-                    const count = counts[index];
-                    currentCounts[platform.name] = count; 
-                    // *** CORREÇÃO DO BUG "platformClass is not defined" ***
-                    createLinkButton(platform.name, platform.url, platform.class, count);
+                // 3. CRIAR OS BOTÕES (sem buscar contadores)
+                platformsToCreate.forEach((platform) => {
+                    createLinkButton(platform.name, platform.url, platform.class, query);
                 });
 
-                // 5. EXIBIR TUDO
+                // 4. EXIBIR TUDO
                 resultsContainer.style.display = 'block';
-                updateDisplay(); 
 
             } catch (error) {
                 console.error(error);
                 alert('Ocorreu um erro ao buscar. Tente novamente.');
             } finally {
                 loadingMessage.style.display = 'none';
-                loadingMessage.innerText = 'Buscando...';
             }
         }
 
         // Função que cria os botões na tela
-        function createLinkButton(platformName, url, platformClass, initialCount) {
+        function createLinkButton(platformName, url, platformClass, songQuery) {
             const button = document.createElement('a');
             button.href = url;
             button.target = '_blank';
             button.className = 'music-platform-button ' + platformClass;
             button.dataset.platform = platformName; 
-            button.dataset.class = platformClass; // Bug da "platformClass" corrigido aqui
+            button.dataset.class = platformClass;
 
+            // HTML do botão (simplificado, sem contador)
             button.innerHTML = `
                 <span class="platform-name">${platformName}</span>
-                <span class="click-counter">${initialCount} cliques</span>
             `;
             
             button.addEventListener('click', (e) => {
-                trackClick(platformName);
+                // Envia o clique para o Google Analytics
+                trackClick(platformName, songQuery);
             });
 
             linksContainer.appendChild(button);
         }
 
-        // Função especial para buscar no Deezer (usa JSONP)
+        // Função especial para buscar no Deezer (JSONP)
         function searchDeezer(query) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
