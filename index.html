@@ -124,14 +124,13 @@
             font-size: 0.8em;
         }
         
-        /* Cores das plataformas */
+        /* Cores das plataformas (sem Claro Música) */
         .spotify .platform-name::before { color: #1DB954; }
         .appleMusic .platform-name::before { color: #FA58D8; }
         .deezer .platform-name::before { color: #FEAA2D; }
         .youtubeMusic .platform-name::before { color: #FF0000; }
         .amazonMusic .platform-name::before { color: #00A8E1; }
         .soundCloud .platform-name::before { color: #FF5500; }
-        .claroMusica .platform-name::before { color: #E50000; }
         .tidal .platform-name::before { color: #00ffff; }
         
     </style>
@@ -172,8 +171,6 @@
         const songArtist = document.getElementById('song-artist');
         const linksContainer = document.getElementById('links-container');
         
-        // --- NOVIDADE AQUI ---
-        // Pega a caixa de busca inteira
         const searchBox = document.getElementById('search-box');
 
         searchButton.addEventListener('click', searchMusic);
@@ -183,21 +180,16 @@
             const artistaDaUrl = params.get('artista');
             const musicaDaUrl = params.get('musica');
 
-            // --- LÓGICA ATUALIZADA AQUI ---
             if (artistaDaUrl && musicaDaUrl) {
                 // Se veio da URL, ESCONDE a caixa de busca
                 if (searchBox) {
                     searchBox.style.display = 'none';
                 }
                 
-                // Preenche os campos (mesmo escondidos) e clica no botão
                 artistInput.value = artistaDaUrl;
                 songInput.value = musicaDaUrl;
                 searchButton.click();
             }
-            // Se não veio da URL, não faz nada, e a caixa de busca
-            // continua visível por padrão.
-            // --- FIM DA ATUALIZAÇÃO ---
         });
 
         // --- FUNÇÃO DE CONTADOR (APENAS GOOGLE ANALYTICS) ---
@@ -226,9 +218,8 @@
                 return;
             }
 
-            // Mostra a mensagem de "carregando"
             if (searchBox.style.display === 'none') {
-                loadingMessage.style.display = 'block'; // Mostra o "buscando" se a caixa estiver oculta
+                loadingMessage.style.display = 'block'; 
             }
 
             resultsContainer.style.display = 'none';
@@ -236,15 +227,15 @@
             
             const query = `${artist} ${song}`;
 
-            // Lista de plataformas atualizada
+            // --- LISTA DE PLATAFORMAS ATUALIZADA (SEM CLARO MÚSICA) ---
             const platformsToCreate = [
                 { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, class: 'spotify' },
                 { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, class: 'youtubeMusic' },
                 { name: 'Amazon Music', url: `https://music.amazon.com.br/search/${encodeURIComponent(query)}`, class: 'amazonMusic' },
                 { name: 'SoundCloud', url: `https://soundcloud.com/search/sounds?q=${encodeURIComponent(query)}`, class: 'soundCloud' },
-                { name: 'Claro Música', url: `https://www.claromusica.com/search/${encodeURIComponent(query)}`, class: 'claroMusica' },
                 { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, class: 'tidal' }
             ];
+            // --- FIM DA ATUALIZAÇÃO ---
 
             try {
                 // 1. BUSCAR NO APPLE MUSIC
@@ -282,7 +273,6 @@
                 console.error(error);
                 alert('Ocorreu um erro ao buscar. Tente novamente.');
             } finally {
-                // Esconde a mensagem de "carregando"
                 loadingMessage.style.display = 'none';
             }
         }
