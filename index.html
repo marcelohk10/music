@@ -103,7 +103,7 @@
             background-color: #282828;
         }
         .music-platform-button {
-            display: flex; /* Mudei para flex */
+            display: flex; 
             justify-content: space-between;
             align-items: center;
             padding: 18px;
@@ -123,11 +123,17 @@
             margin-right: 12px;
             font-size: 0.8em;
         }
+        
+        /* --- NOVO CSS AQUI --- */
         .spotify .platform-name::before { color: #1DB954; }
         .appleMusic .platform-name::before { color: #FA58D8; }
         .deezer .platform-name::before { color: #FEAA2D; }
         .youtubeMusic .platform-name::before { color: #FF0000; }
+        .amazonMusic .platform-name::before { color: #00A8E1; } /* Cor do Amazon Music */
+        .soundCloud .platform-name::before { color: #FF5500; } /* Cor do SoundCloud */
+        .claroMusica .platform-name::before { color: #E50000; } /* Cor do Claro */
         .tidal .platform-name::before { color: #00ffff; }
+        /* --- FIM DO NOVO CSS --- */
         
     </style>
 </head>
@@ -187,14 +193,12 @@
         function trackClick(platformName, songQuery) {
             console.log(`Clique rastreado para: ${platformName} (Música: ${songQuery})`);
             
-            // *** O GOOGLE ANALYTICS RASTREIA O CLIQUE AQUI ***
             if (typeof gtag === 'function') {
                 gtag('event', 'click_plataforma', {
                     'plataforma': platformName,
                     'musica': songQuery
                 });
             } else {
-                // Isso não deve acontecer, pois o script está no <head>
                 console.warn('Google Analytics (gtag) não encontrado.');
             }
         }
@@ -216,11 +220,16 @@
             
             const query = `${artist} ${song}`;
 
+            // --- LISTA DE PLATAFORMAS ATUALIZADA ---
             const platformsToCreate = [
                 { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, class: 'spotify' },
                 { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, class: 'youtubeMusic' },
+                { name: 'Amazon Music', url: `https://music.amazon.com.br/search/${encodeURIComponent(query)}`, class: 'amazonMusic' },
+                { name: 'SoundCloud', url: `https://soundcloud.com/search/sounds?q=${encodeURIComponent(query)}`, class: 'soundCloud' },
+                { name: 'Claro Música', url: `https://www.claromusica.com/search/${encodeURIComponent(query)}`, class: 'claroMusica' },
                 { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, class: 'tidal' }
             ];
+            // --- FIM DA ATUALIZAÇÃO ---
 
             try {
                 // 1. BUSCAR NO APPLE MUSIC
@@ -233,6 +242,7 @@
                     artwork.style.display = 'block';
                     songTitle.innerText = track.trackName;
                     songArtist.innerText = track.artistName;
+                    // Adiciona Apple Music no topo da lista
                     platformsToCreate.unshift({ name: 'Apple Music', url: track.trackViewUrl, class: 'appleMusic' });
                 } else {
                     songTitle.innerText = song;
@@ -243,10 +253,11 @@
                 // 2. BUSCAR NO DEEZER (usa JSONP)
                 const deezerData = await searchDeezer(query);
                 if (deezerData) {
+                    // Adiciona Deezer no topo da lista
                     platformsToCreate.unshift({ name: 'Deezer', url: deezerData.link, class: 'deezer' });
                 }
 
-                // 3. CRIAR OS BOTÕES (sem buscar contadores)
+                // 3. CRIAR OS BOTÕES
                 platformsToCreate.forEach((platform) => {
                     createLinkButton(platform.name, platform.url, platform.class, query);
                 });
