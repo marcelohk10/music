@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Links de Música (Contador Global)</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/counterapi/dist/counter.browser.min.js"></script>
+
     <style>
         /* O CSS (estilo) é o mesmo */
         body {
@@ -208,8 +211,14 @@
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO DA API DE CONTADOR ---
-        const API_NAMESPACE = 'marcelo-links-musicais-v1.netlify.app';
+        // --- CONFIGURAÇÃO DO CONTADOR (PASSO 2) ---
+        // Este é o seu "workspace" (espaço de trabalho) na API.
+        // Já está preenchido com o nome único que definimos.
+        const API_WORKSPACE = 'marcelo-links-musicais-v1';
+
+        // *** NOVIDADE AQUI (PASSO 3) ***
+        // Inicializa a biblioteca de contador que carregamos no <head>
+        const counter = new Counter({ workspace: API_WORKSPACE });
         // ------------------------------------
 
         // Pega os elementos do HTML
@@ -242,22 +251,23 @@
             }
         });
 
-        // --- FUNÇÕES DE CONTADOR (CORRIGIDAS) ---
-        
+        // --- FUNÇÕES DE CONTADOR (TOTALMENTE REESCRITAS) ---
+
         // Pega o clique ATUAL da API
         async function getCount(platformName) {
             try {
-                // *** CORREÇÃO AQUI ***
                 // A chave é a música + plataforma
                 const key = `${currentSongKey}-${platformName.toLowerCase()}`;
-                // A API é chamada com NAMESPACE / KEY
-                const response = await fetch(`https://api.counter.dev/get/${API_NAMESPACE}/${key}`);
                 
-                if (!response.ok) return 0;
-                const data = await response.json();
-                return data.value || 0;
+                // *** NOVIDADE AQUI (PASSO 4) ***
+                // Usa a biblioteca "counter.get()" em vez de "fetch"
+                const result = await counter.get(key);
+                return result.value || 0;
+
             } catch (error) {
-                console.error('Erro ao buscar contagem:', error);
+                console.warn(`Erro ao buscar contagem para ${platformName}:`, error.message);
+                // A API da "counterapi" retorna erro se a chave não existir,
+                // então "pegar" o erro e retornar 0 é o esperado.
                 return 0;
             }
         }
@@ -265,16 +275,15 @@
         // Registra um NOVO clique na API
         async function trackClick(platformName) {
             try {
-                // *** CORREÇÃO AQUI ***
                 // A chave é a música + plataforma
                 const key = `${currentSongKey}-${platformName.toLowerCase()}`;
                 
-                // 1. Envia o clique para a API com NAMESPACE / KEY
-                const response = await fetch(`https://api.counter.dev/hit/${API_NAMESPACE}/${key}`);
-                const data = await response.json();
+                // *** NOVIDADE AQUI (PASSO 5) ***
+                // Usa a biblioteca "counter.up()" (subir) em vez de "fetch"
+                const result = await counter.up(key);
                 
                 // 2. Atualiza nosso objeto de contagem local
-                currentCounts[platformName] = data.value;
+                currentCounts[platformName] = result.value;
 
                 // 3. Atualiza a tela (Gráficos e Contadores)
                 updateDisplay();
@@ -290,7 +299,6 @@
             let maxClicks = 0;
             let platforms = [];
 
-            // 1. Atualiza contadores nos botões
             buttons.forEach(button => {
                 const platformName = button.dataset.platform;
                 const clickCount = currentCounts[platformName] || 0;
@@ -299,19 +307,16 @@
                 if (counterSpan) {
                     counterSpan.innerText = `${clickCount} cliques`;
                 }
-
                 platforms.push({ 
                     name: platformName, 
                     clicks: clickCount, 
                     class: button.dataset.class 
                 });
-
                 if (clickCount > maxClicks) {
                     maxClicks = clickCount;
                 }
             });
 
-            // 2. Redesenha os gráficos
             graphBarsContainer.innerHTML = '';
             
             if (maxClicks === 0) {
@@ -427,7 +432,11 @@
             `;
             
             button.addEventListener('click', (e) => {
+                // Previne o clique, registra, e DEPOIS abre o link
+                // Isso é opcional, mas garante que o contador registre
+                // e.preventDefault(); 
                 trackClick(platformName);
+                // window.open(url, '_blank'); // Descomente isso se usar o preventDefault
             });
 
             linksContainer.appendChild(button);
