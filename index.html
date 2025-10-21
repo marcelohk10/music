@@ -267,6 +267,7 @@
         async function getCount(platformName) {
             try {
                 const key = `${currentSongKey}-${platformName.toLowerCase()}`;
+                // *** API NOVA (JSONP) ***
                 const url = `https://api.visitordata.io/v1/hits?ns=${API_NAMESPACE}&key=${key}`;
                 // O nome da função de callback é único para evitar conflitos
                 const callbackName = `cb_${platformName}_get`; 
@@ -284,6 +285,7 @@
         async function trackClick(platformName) {
             try {
                 const key = `${currentSongKey}-${platformName.toLowerCase()}`;
+                // *** API NOVA (JSONP) ***
                 const url = `https://api.visitordata.io/v1/hits?ns=${API_NAMESPACE}&key=${key}&hit=true`;
                 const callbackName = `cb_${platformName}_hit`;
 
@@ -407,7 +409,7 @@
                 platformsToCreate.forEach((platform, index) => {
                     const count = counts[index];
                     currentCounts[platform.name] = count; 
-                    // Bug da "platformClass" corrigido aqui
+                    // *** CORREÇÃO DO BUG "platformClass is not defined" ***
                     createLinkButton(platform.name, platform.url, platform.class, count);
                 });
 
