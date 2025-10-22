@@ -10,7 +10,7 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-    
+
       gtag('config', 'G-2VQ0ZJ5JEY');
     </script>
     <style>
@@ -38,6 +38,19 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             margin-bottom: 20px;
         }
+        /* --- NOVO CSS --- */
+        .search-box h1 {
+            margin-top: 0;
+            margin-bottom: 10px; /* Reduz espaço abaixo do título */
+        }
+        .search-box p.intro-text {
+            font-size: 1.1em;
+            color: #b3b3b3;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        /* --- FIM NOVO CSS --- */
+
         input[type="text"] {
             width: 100%;
             padding: 12px 15px;
@@ -105,7 +118,7 @@
             background-color: #282828;
         }
         .music-platform-button {
-            display: flex; 
+            display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 18px;
@@ -125,7 +138,7 @@
             margin-right: 12px;
             font-size: 0.8em;
         }
-        
+
         /* Cores das plataformas */
         .spotify .platform-name::before { color: #1DB954; }
         .appleMusic .platform-name::before { color: #FA58D8; }
@@ -170,7 +183,7 @@
         .social-button:hover {
             opacity: 0.8;
         }
-        
+
         #share-button {
             background-color: #007bff; /* Azul */
             margin-top: 15px;
@@ -186,14 +199,17 @@
         .instagram-button {
             background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
         }
-        
+
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="search-box" id="search-box">
-            <h1 style="margin-top: 0;">Links de Música</h1>
+            <h1>Links de Música</h1>
+            <p class="intro-text" id="intro-text">
+                Digite o nome do artista e da música para encontrar onde ouvir em várias plataformas.
+            </p>
             <input type="text" id="artist-input" placeholder="Nome do Artista">
             <input type="text" id="song-input" placeholder="Nome da Música">
             <button id="search-button">Buscar Links</button>
@@ -207,10 +223,10 @@
                 <p id="song-artist"></p>
                 <button id="share-button" class="social-button" style="display: none;"></button>
             </div>
-            
+
             <div id="links-container">
                 </div>
-            
+
             <div id="social-links-container">
                 <h3>Usar esta música em seu post</h3>
                 <div id="social-buttons">
@@ -225,24 +241,25 @@
         const songInput = document.getElementById('song-input');
         const searchButton = document.getElementById('search-button');
         const loadingMessage = document.getElementById('loading');
-        
+
         const resultsContainer = document.getElementById('results-container');
         const artwork = document.getElementById('artwork');
         const songTitle = document.getElementById('song-title');
         const songArtist = document.getElementById('song-artist');
         const linksContainer = document.getElementById('links-container');
-        
+
         const socialLinksContainer = document.getElementById('social-links-container');
         const socialButtonsContainer = document.getElementById('social-buttons');
-        
+
         const shareButton = document.getElementById('share-button');
         const searchBox = document.getElementById('search-box');
+        const introText = document.getElementById('intro-text'); // Pega o texto explicativo
 
         // Pega os parâmetros da URL
         const params = new URLSearchParams(window.location.search);
         const artistaDaUrl = params.get('artista');
         const musicaDaUrl = params.get('musica');
-        
+
         const tiktokUrl = params.get('tiktok_url');
         const instagramUrl = params.get('ig_url');
 
@@ -251,31 +268,30 @@
 
         window.addEventListener('load', () => {
             if (artistaDaUrl && musicaDaUrl) {
-                if (searchBox) {
-                    searchBox.style.display = 'none';
-                }
+                // Se veio da URL, esconde a busca e o texto intro
+                if (searchBox) searchBox.style.display = 'none';
+                if (introText) introText.style.display = 'none'; // Esconde o texto
+
                 artistInput.value = artistaDaUrl;
                 songInput.value = musicaDaUrl;
 
-                // --- NOVIDADE AQUI ---
-                // Envia o evento de page view para o Google Analytics
                 if (typeof gtag === 'function') {
                     gtag('event', 'page_view_song', {
                         'musica': `${artistaDaUrl} ${musicaDaUrl}`,
                         'artista': artistaDaUrl
                     });
                 }
-                // --- FIM DA NOVIDADE ---
 
                 searchButton.click();
             }
+            // Se não veio da URL, a caixa de busca e o texto continuam visíveis
         });
 
         // --- FUNÇÃO DE CONTADOR (APENAS GOOGLE ANALYTICS) ---
 
         function trackClick(eventName, platformName, songQuery) {
             console.log(`Evento: ${eventName}, Plataforma: ${platformName}, Música: ${songQuery}`);
-            
+
             if (typeof gtag === 'function') {
                 gtag('event', eventName, {
                     'link_tipo': platformName,
@@ -285,33 +301,37 @@
                 console.warn('Google Analytics (gtag) não encontrado.');
             }
         }
-        
+
         // --- FUNÇÕES PRINCIPAIS ---
 
         async function searchMusic() {
             const artist = artistInput.value;
             const song = songInput.value;
-            
+
             if (!artist || !song) {
                 alert('Por favor, preencha o artista e a música.');
                 return;
             }
 
-            if (searchBox.style.display === 'none') {
-                loadingMessage.style.display = 'block'; 
+            // Mostra loading só se a caixa estiver oculta
+            if (searchBox && searchBox.style.display === 'none') {
+                loadingMessage.style.display = 'block';
+            } else {
+                 loadingMessage.style.display = 'block'; // Mostra dentro da caixa se ela estiver visível
             }
 
+
             resultsContainer.style.display = 'none';
-            linksContainer.innerHTML = ''; 
+            linksContainer.innerHTML = '';
             socialButtonsContainer.innerHTML = '';
-            
+
             const query = `${artist} ${song}`;
 
             // Lista de plataformas de streaming
             const platformsToCreate = [
                 { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, class: 'spotify' },
                 { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, class: 'youtubeMusic' },
-                { name: 'TikTok Music', url: `https://music.tiktok.com/search/music?q=${encodeURIComponent(query)}`, class: 'tiktokMusic' },
+                { name: 'TikTok Music', url: `https://www.tiktok.com/search/music?q=${encodeURIComponent(query)}`, class: 'tiktokMusic' },
                 { name: 'Amazon Music', url: `https://music.amazon.com.br/search/${encodeURIComponent(query)}`, class: 'amazonMusic' },
                 { name: 'SoundCloud', url: `https://soundcloud.com/search/sounds?q=${encodeURIComponent(query)}`, class: 'soundCloud' },
                 { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, class: 'tidal' }
@@ -348,22 +368,22 @@
 
                 // 4. CRIAR OS BOTÕES SOCIAIS
                 let socialLinksFound = false;
-                
+
                 if (tiktokUrl) {
                     createSocialButton(
-                        'Usar Som no TikTok', 
-                        tiktokUrl, 
-                        'tiktok-button', 
+                        'Usar Som no TikTok',
+                        tiktokUrl,
+                        'tiktok-button',
                         query
                     );
                     socialLinksFound = true;
                 }
-                
+
                 if (instagramUrl) {
                     createSocialButton(
-                        'Usar Som no Instagram', 
-                        instagramUrl, 
-                        'instagram-button', 
+                        'Usar Som no Instagram',
+                        instagramUrl,
+                        'instagram-button',
                         query
                     );
                     socialLinksFound = true;
@@ -374,7 +394,7 @@
                 } else {
                     socialLinksContainer.style.display = 'none';
                 }
-                
+
                 // 5. CONFIGURAR O BOTÃO DE COMPARTILHAR
                 const shareTitle = `${songTitle.innerText} por ${songArtist.innerText}`;
                 const shareUrl = window.location.href;
@@ -382,7 +402,7 @@
                 if (navigator.share) {
                     shareButton.innerText = 'Compartilhar Link 📲';
                     shareButton.classList.remove('copy-mode');
-                    
+
                     shareButton.onclick = (e) => {
                         e.preventDefault();
                         navigator.share({
@@ -390,29 +410,30 @@
                             text: `Ouça "${shareTitle}" em todas as plataformas:`,
                             url: shareUrl
                         }).then(() => {
-                            // Envia evento de clique para o GA
                             trackClick('click_share', 'Compartilhar (Nativo)', query);
                         }).catch(err => console.error('Erro no share:', err));
                     };
                 } else if (navigator.clipboard) {
-                    shareButton.innerText = 'Copiar Link p/ Compartilhar 🔗';
+                    // --- TEXTO ATUALIZADO AQUI ---
+                    shareButton.innerText = 'Copiar Link (Compartilhar)';
                     shareButton.classList.add('copy-mode');
-                    
+
                     shareButton.onclick = (e) => {
                         e.preventDefault();
                         navigator.clipboard.writeText(shareUrl).then(() => {
                             shareButton.innerText = 'Link Copiado! 👍';
-                            // Envia evento de clique para o GA
                             trackClick('click_share', 'Copiar Link (Desktop)', query);
-                            setTimeout(() => { shareButton.innerText = 'Copiar Link 🔗'; }, 2000);
+                            // Volta ao texto original depois de 2 segundos
+                            setTimeout(() => { shareButton.innerText = 'Copiar Link (Compartilhar)'; }, 2000);
                         }).catch(err => console.error('Erro ao copiar:', err));
                     };
+                    // --- FIM DA ATUALIZAÇÃO ---
                 }
-                
+
                 if (navigator.share || navigator.clipboard) {
                     shareButton.style.display = 'block';
                 }
-                
+
                 // 6. EXIBIR TUDO
                 resultsContainer.style.display = 'block';
 
@@ -430,15 +451,14 @@
             button.href = url;
             button.target = '_blank';
             button.className = 'music-platform-button ' + platformClass;
-            button.dataset.platform = platformName; 
+            button.dataset.platform = platformName;
             button.dataset.class = platformClass;
 
             button.innerHTML = `
                 <span class="platform-name">${platformName}</span>
             `;
-            
+
             button.addEventListener('click', (e) => {
-                // Envia evento de clique para o GA
                 trackClick('click_streaming', platformName, songQuery);
             });
 
@@ -452,9 +472,8 @@
             button.target = '_blank';
             button.className = 'social-button ' + cssClass;
             button.innerText = text;
-            
+
             button.addEventListener('click', (e) => {
-                // Envia evento de clique para o GA
                 trackClick('click_social_sound', text, songQuery);
             });
 
@@ -465,14 +484,14 @@
         function searchDeezer(query) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                const callbackName = 'deezerCallback'; 
+                const callbackName = 'deezerCallback';
                 window[callbackName] = function(data) {
                     document.body.removeChild(script);
                     delete window[callbackName];
                     if (data.data && data.data.length > 0) {
-                        resolve(data.data[0]); 
+                        resolve(data.data[0]);
                     } else {
-                        resolve(null); 
+                        resolve(null);
                     }
                 };
                 script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&output=jsonp&callback=${callbackName}`;
