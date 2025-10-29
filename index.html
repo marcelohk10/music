@@ -260,6 +260,10 @@
         const params = new URLSearchParams(window.location.search);
         const artistaDaUrl = params.get('artista');
         const musicaDaUrl = params.get('musica');
+        
+        // --- NOVO: Pega a URL da arte (se existir) ---
+        const artworkUrlParam = params.get('artwork_url');
+        // --- FIM NOVO ---
 
         const tiktokUrl = params.get('tiktok_url');
         const instagramUrl = params.get('ig_url');
@@ -335,82 +339,81 @@
                 { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, class: 'tidal' }
             ];
 
-            let itunesData = null; // Variável para guardar dados do iTunes
-            let itunesResponseOk = false; // Flag para status da resposta
+            let foundArtwork = false; // Flag para saber se achamos a arte
 
             try {
-                // --- 1. BUSCAR NO APPLE MUSIC (COM LOGS DETALHADOS) ---
-                const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR`;
-                console.log("Tentando buscar no iTunes:", itunesUrl);
-
-                const itunesResponse = await fetch(itunesUrl);
-                itunesResponseOk = itunesResponse.ok; // Guarda se a resposta foi 2xx
-                console.log("Resposta iTunes (status):", itunesResponse.status);
-
-                if (itunesResponseOk) {
-                    try {
-                        itunesData = await itunesResponse.json();
-                        console.log("Dados iTunes recebidos:", JSON.stringify(itunesData));
-                    } catch (jsonError) {
-                        console.error("Erro ao parsear JSON do iTunes:", jsonError);
-                        // A resposta foi ok, mas não era JSON válido. Trata como se não tivesse encontrado.
-                        itunesData = { results: [] }; // Define como vazio para o próximo if falhar
+                // --- 1. TENTAR BUSCAR NO APPLE MUSIC ---
+                try {
+                    const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR`;
+                    const itunesResponse = await fetch(itunesUrl);
+                    if (itunesResponse.ok) {
+                        const itunesData = await itunesResponse.json();
+                        if (itunesData.results && itunesData.results.length > 0) {
+                            const track = itunesData.results[0];
+                            if (track.artworkUrl100) {
+                                artwork.src = track.artworkUrl100.replace('100x100', '300x300');
+                                artwork.style.display = 'block';
+                                foundArtwork = true; // Achamos!
+                            }
+                            songTitle.innerText = track.trackName;
+                            songArtist.innerText = track.artistName;
+                            platformsToCreate.unshift({ name: 'Apple Music', url: track.trackViewUrl, class: 'appleMusic' });
+                        }
+                    } else {
+                         console.warn("Busca no iTunes falhou com status:", itunesResponse.status);
                     }
-                } else {
-                    // A resposta não foi 2xx (ex: 404, 500)
-                    console.error("Erro na resposta da API do iTunes, status:", itunesResponse.status);
-                     itunesData = { results: [] }; // Define como vazio
+                } catch (itunesError) {
+                    console.error("Erro ao buscar no iTunes:", itunesError);
                 }
 
-
-                if (itunesData && itunesData.results && itunesData.results.length > 0) {
-                    console.log("Música encontrada no iTunes!");
-                    const track = itunesData.results[0];
-                    if (track.artworkUrl100) {
-                        artwork.src = track.artworkUrl100.replace('100x100', '300x300');
-                        artwork.style.display = 'block';
-                    }
-                    songTitle.innerText = track.trackName;
-                    songArtist.innerText = track.artistName;
-                    platformsToCreate.unshift({ name: 'Apple Music', url: track.trackViewUrl, class: 'appleMusic' });
-                } else {
-                    console.warn('Música NÃO encontrada no iTunes/Apple Music para a busca:', query);
+                // --- 2. FALLBACK PARA artwork_url ---
+                if (!foundArtwork && artworkUrlParam) {
+                    console.log("Usando artwork_url da URL:", artworkUrlParam);
+                    artwork.src = artworkUrlParam;
+                    artwork.style.display = 'block';
+                    foundArtwork = true; // Achamos (pelo parâmetro)!
+                }
+                
+                // Se ainda não achamos a arte, usa os nomes da URL como fallback
+                if (!foundArtwork) {
                     songTitle.innerText = song;
                     songArtist.innerText = artist;
                 }
-                // --- FIM DA BUSCA NO APPLE MUSIC ---
 
-                // 2. BUSCAR NO DEEZER (usa JSONP)
-                const deezerData = await searchDeezer(query);
-                if (deezerData) {
-                    platformsToCreate.unshift({ name: 'Deezer', url: deezerData.link, class: 'deezer' });
+                // --- 3. BUSCAR NO DEEZER ---
+                try {
+                    const deezerData = await searchDeezer(query);
+                    if (deezerData) {
+                        platformsToCreate.unshift({ name: 'Deezer', url: deezerData.link, class: 'deezer' });
+                    }
+                } catch (deezerError) {
+                    console.error("Erro ao buscar no Deezer:", deezerError);
+                    // Continua mesmo se o Deezer falhar
                 }
 
-                // 3. CRIAR OS BOTÕES DE STREAMING
+
+                // --- 4. CRIAR OS BOTÕES DE STREAMING ---
                 platformsToCreate.forEach((platform) => {
                     createLinkButton(platform.name, platform.url, platform.class, query);
                 });
 
-                // 4. CRIAR OS BOTÕES SOCIAIS
+                // --- 5. CRIAR OS BOTÕES SOCIAIS ---
                 let socialLinksFound = false;
                 if (tiktokUrl) { createSocialButton('Usar Som no TikTok', tiktokUrl, 'tiktok-button', query); socialLinksFound = true; }
                 if (instagramUrl) { createSocialButton('Usar Som no Instagram', instagramUrl, 'instagram-button', query); socialLinksFound = true; }
                 socialLinksContainer.style.display = socialLinksFound ? 'block' : 'none';
 
-                // 5. CONFIGURAR O BOTÃO DE COMPARTILHAR
+                // --- 6. CONFIGURAR O BOTÃO DE COMPARTILHAR ---
+                // Usa o título que definimos (do iTunes ou da URL)
                 const shareTitle = `${songTitle.innerText} por ${songArtist.innerText}`;
                 const shareUrl = window.location.href;
                 setupShareButton(shareTitle, shareUrl, query);
 
-                // 6. EXIBIR TUDO
+                // --- 7. EXIBIR TUDO ---
                 resultsContainer.style.display = 'block';
 
             } catch (error) {
                 console.error("Erro GERAL na função searchMusic:", error);
-                // Tenta mostrar a resposta crua do iTunes se o JSON falhou antes
-                if (!itunesResponseOk && itunesResponse) { // Se a resposta não foi OK
-                    itunesResponse.text().then(text => console.error("Resposta crua do iTunes (erro):", text));
-                }
                 alert('Ocorreu um erro ao buscar os dados da música. Verifique o console para mais detalhes.');
             } finally {
                 loadingMessage.style.display = 'none';
@@ -476,9 +479,9 @@
         function searchDeezer(query) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                const callbackName = 'deezerCallback' + Date.now(); // Nome único para evitar conflitos
+                const callbackName = 'deezerCallback' + Date.now();
                 window[callbackName] = function(data) {
-                    try { document.body.removeChild(script); } catch(e) {} // Tenta remover
+                    try { document.body.removeChild(script); } catch(e) {}
                     delete window[callbackName];
                     if (data && data.data && data.data.length > 0) {
                         resolve(data.data[0]);
@@ -494,7 +497,6 @@
                     reject(new Error('Falha ao carregar API do Deezer'));
                 };
                 document.body.appendChild(script);
-                 // Timeout para garantir limpeza se a API falhar silenciosamente
                 setTimeout(() => {
                     if (window[callbackName]) {
                         console.warn('Timeout na busca do Deezer');
@@ -502,7 +504,7 @@
                         delete window[callbackName];
                         reject(new Error('Timeout na busca do Deezer'));
                     }
-                }, 5000); // 5 segundos de timeout
+                }, 5000);
             });
         }
     </script>
