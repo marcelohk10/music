@@ -260,11 +260,7 @@
         const params = new URLSearchParams(window.location.search);
         const artistaDaUrl = params.get('artista');
         const musicaDaUrl = params.get('musica');
-        
-        // --- NOVO: Pega a URL da arte (se existir) ---
         const artworkUrlParam = params.get('artwork_url');
-        // --- FIM NOVO ---
-
         const tiktokUrl = params.get('tiktok_url');
         const instagramUrl = params.get('ig_url');
 
@@ -340,30 +336,50 @@
             ];
 
             let foundArtwork = false; // Flag para saber se achamos a arte
+            let itunesData = null; // Para guardar a resposta completa
 
             try {
                 // --- 1. TENTAR BUSCAR NO APPLE MUSIC ---
                 try {
                     const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR`;
+                    console.log("Tentando buscar no iTunes:", itunesUrl); // Log da URL de busca
+
                     const itunesResponse = await fetch(itunesUrl);
+                    console.log("Resposta iTunes (status):", itunesResponse.status); // Log do status
+
                     if (itunesResponse.ok) {
-                        const itunesData = await itunesResponse.json();
+                        itunesData = await itunesResponse.json();
+                        // *** NOVO LOG AQUI ***
+                        console.log("Dados recebidos do iTunes:", JSON.stringify(itunesData, null, 2)); // Mostra os dados formatados
+                        // *** FIM DO NOVO LOG ***
+
                         if (itunesData.results && itunesData.results.length > 0) {
+                            console.log("Música encontrada no iTunes!");
                             const track = itunesData.results[0];
                             if (track.artworkUrl100) {
                                 artwork.src = track.artworkUrl100.replace('100x100', '300x300');
                                 artwork.style.display = 'block';
-                                foundArtwork = true; // Achamos!
+                                foundArtwork = true;
                             }
                             songTitle.innerText = track.trackName;
                             songArtist.innerText = track.artistName;
                             platformsToCreate.unshift({ name: 'Apple Music', url: track.trackViewUrl, class: 'appleMusic' });
+                        } else {
+                            // API respondeu OK, mas sem resultados
+                            console.warn('Música NÃO encontrada no iTunes (resultCount 0)');
                         }
                     } else {
-                         console.warn("Busca no iTunes falhou com status:", itunesResponse.status);
+                        // API retornou um erro (4xx, 5xx)
+                         console.error("Erro na resposta da API do iTunes, status:", itunesResponse.status);
+                         // Tenta ler a resposta de erro
+                         try {
+                            const errorText = await itunesResponse.text();
+                            console.error("Corpo da resposta de erro do iTunes:", errorText);
+                         } catch (e) { console.error("Não foi possível ler corpo do erro");}
                     }
                 } catch (itunesError) {
-                    console.error("Erro ao buscar no iTunes:", itunesError);
+                    // Erro de rede ou outro erro no fetch
+                    console.error("Erro CRÍTICO ao buscar no iTunes:", itunesError);
                 }
 
                 // --- 2. FALLBACK PARA artwork_url ---
@@ -371,11 +387,11 @@
                     console.log("Usando artwork_url da URL:", artworkUrlParam);
                     artwork.src = artworkUrlParam;
                     artwork.style.display = 'block';
-                    foundArtwork = true; // Achamos (pelo parâmetro)!
+                    foundArtwork = true;
                 }
                 
-                // Se ainda não achamos a arte, usa os nomes da URL como fallback
-                if (!foundArtwork) {
+                // Se ainda não achamos a arte E não definimos título/artista pelo iTunes, usa os nomes da URL
+                if (!foundArtwork && songTitle.innerText === '') {
                     songTitle.innerText = song;
                     songArtist.innerText = artist;
                 }
@@ -388,7 +404,6 @@
                     }
                 } catch (deezerError) {
                     console.error("Erro ao buscar no Deezer:", deezerError);
-                    // Continua mesmo se o Deezer falhar
                 }
 
 
@@ -404,7 +419,6 @@
                 socialLinksContainer.style.display = socialLinksFound ? 'block' : 'none';
 
                 // --- 6. CONFIGURAR O BOTÃO DE COMPARTILHAR ---
-                // Usa o título que definimos (do iTunes ou da URL)
                 const shareTitle = `${songTitle.innerText} por ${songArtist.innerText}`;
                 const shareUrl = window.location.href;
                 setupShareButton(shareTitle, shareUrl, query);
@@ -471,7 +485,7 @@
                 };
                  shareButton.style.display = 'block';
             } else {
-                 shareButton.style.display = 'none'; // Esconde se nenhuma API funcionar
+                 shareButton.style.display = 'none';
             }
         }
 
