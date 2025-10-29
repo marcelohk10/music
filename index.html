@@ -38,10 +38,9 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             margin-bottom: 20px;
         }
-        /* --- NOVO CSS --- */
         .search-box h1 {
             margin-top: 0;
-            margin-bottom: 10px; /* Reduz espaço abaixo do título */
+            margin-bottom: 10px;
         }
         .search-box p.intro-text {
             font-size: 1.1em;
@@ -49,7 +48,6 @@
             margin-top: 0;
             margin-bottom: 25px;
         }
-        /* --- FIM NOVO CSS --- */
 
         input[type="text"] {
             width: 100%;
@@ -98,6 +96,10 @@
             height: 120px;
             border-radius: 5px;
             margin-bottom: 15px;
+            /* Garante que a imagem apareça se a URL for encontrada */
+            display: none; /* Começa escondida até termos a URL */
+            margin-left: auto; /* Centraliza a imagem */
+            margin-right: auto;
         }
         #song-title {
             font-size: 1.5em;
@@ -253,7 +255,7 @@
 
         const shareButton = document.getElementById('share-button');
         const searchBox = document.getElementById('search-box');
-        const introText = document.getElementById('intro-text'); // Pega o texto explicativo
+        const introText = document.getElementById('intro-text');
 
         // Pega os parâmetros da URL
         const params = new URLSearchParams(window.location.search);
@@ -268,9 +270,8 @@
 
         window.addEventListener('load', () => {
             if (artistaDaUrl && musicaDaUrl) {
-                // Se veio da URL, esconde a busca e o texto intro
                 if (searchBox) searchBox.style.display = 'none';
-                if (introText) introText.style.display = 'none'; // Esconde o texto
+                if (introText) introText.style.display = 'none';
 
                 artistInput.value = artistaDaUrl;
                 songInput.value = musicaDaUrl;
@@ -284,7 +285,6 @@
 
                 searchButton.click();
             }
-            // Se não veio da URL, a caixa de busca e o texto continuam visíveis
         });
 
         // --- FUNÇÃO DE CONTADOR (APENAS GOOGLE ANALYTICS) ---
@@ -313,17 +313,17 @@
                 return;
             }
 
-            // Mostra loading só se a caixa estiver oculta
             if (searchBox && searchBox.style.display === 'none') {
                 loadingMessage.style.display = 'block';
             } else {
-                 loadingMessage.style.display = 'block'; // Mostra dentro da caixa se ela estiver visível
+                 loadingMessage.style.display = 'block';
             }
 
 
             resultsContainer.style.display = 'none';
             linksContainer.innerHTML = '';
             socialButtonsContainer.innerHTML = '';
+            artwork.style.display = 'none'; // Esconde a imagem antiga
 
             const query = `${artist} ${song}`;
 
@@ -338,22 +338,28 @@
             ];
 
             try {
-                // 1. BUSCAR NO APPLE MUSIC
-                const itunesResponse = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1`);
+                // --- 1. BUSCAR NO APPLE MUSIC (COM CORREÇÃO DE PAÍS) ---
+                const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR`; // Adicionado &country=BR
+                const itunesResponse = await fetch(itunesUrl);
                 const itunesData = await itunesResponse.json();
 
                 if (itunesData.results && itunesData.results.length > 0) {
                     const track = itunesData.results[0];
-                    artwork.src = track.artworkUrl100.replace('100x100', '300x300');
-                    artwork.style.display = 'block';
+                    // Pega a URL da arte e ajusta para um tamanho maior (300x300)
+                    if (track.artworkUrl100) {
+                        artwork.src = track.artworkUrl100.replace('100x100', '300x300');
+                        artwork.style.display = 'block'; // Mostra a imagem
+                    }
                     songTitle.innerText = track.trackName;
                     songArtist.innerText = track.artistName;
                     platformsToCreate.unshift({ name: 'Apple Music', url: track.trackViewUrl, class: 'appleMusic' });
                 } else {
-                    songTitle.innerText = song;
-                    songArtist.innerText = artist;
-                    artwork.style.display = 'none';
+                    console.warn('Música não encontrada no iTunes/Apple Music para a busca:', query);
+                    songTitle.innerText = song; // Usa o nome da URL como fallback
+                    songArtist.innerText = artist; // Usa o nome da URL como fallback
+                    // artwork.style.display = 'none'; // Já está escondido por padrão
                 }
+                // --- FIM DA BUSCA NO APPLE MUSIC ---
 
                 // 2. BUSCAR NO DEEZER (usa JSONP)
                 const deezerData = await searchDeezer(query);
@@ -414,7 +420,6 @@
                         }).catch(err => console.error('Erro no share:', err));
                     };
                 } else if (navigator.clipboard) {
-                    // --- TEXTO ATUALIZADO AQUI ---
                     shareButton.innerText = 'Copiar Link (Compartilhar)';
                     shareButton.classList.add('copy-mode');
 
@@ -423,11 +428,9 @@
                         navigator.clipboard.writeText(shareUrl).then(() => {
                             shareButton.innerText = 'Link Copiado! 👍';
                             trackClick('click_share', 'Copiar Link (Desktop)', query);
-                            // Volta ao texto original depois de 2 segundos
                             setTimeout(() => { shareButton.innerText = 'Copiar Link (Compartilhar)'; }, 2000);
                         }).catch(err => console.error('Erro ao copiar:', err));
                     };
-                    // --- FIM DA ATUALIZAÇÃO ---
                 }
 
                 if (navigator.share || navigator.clipboard) {
@@ -438,8 +441,8 @@
                 resultsContainer.style.display = 'block';
 
             } catch (error) {
-                console.error(error);
-                alert('Ocorreu um erro ao buscar. Tente novamente.');
+                console.error("Erro na função searchMusic:", error);
+                alert('Ocorreu um erro ao buscar os dados da música. Verifique o console para mais detalhes.');
             } finally {
                 loadingMessage.style.display = 'none';
             }
@@ -488,7 +491,7 @@
                 window[callbackName] = function(data) {
                     document.body.removeChild(script);
                     delete window[callbackName];
-                    if (data.data && data.data.length > 0) {
+                    if (data && data.data && data.data.length > 0) {
                         resolve(data.data[0]);
                     } else {
                         resolve(null);
@@ -496,6 +499,7 @@
                 };
                 script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&output=jsonp&callback=${callbackName}`;
                 script.onerror = () => {
+                    console.error('Falha ao carregar API do Deezer via JSONP');
                     delete window[callbackName];
                     reject(new Error('Falha ao carregar API do Deezer'));
                 };
