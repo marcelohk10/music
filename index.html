@@ -96,9 +96,8 @@
             height: 120px;
             border-radius: 5px;
             margin-bottom: 15px;
-            /* Garante que a imagem apareça se a URL for encontrada */
-            display: none; /* Começa escondida até termos a URL */
-            margin-left: auto; /* Centraliza a imagem */
+            display: none;
+            margin-left: auto;
             margin-right: auto;
         }
         #song-title {
@@ -319,11 +318,10 @@
                  loadingMessage.style.display = 'block';
             }
 
-
             resultsContainer.style.display = 'none';
             linksContainer.innerHTML = '';
             socialButtonsContainer.innerHTML = '';
-            artwork.style.display = 'none'; // Esconde a imagem antiga
+            artwork.style.display = 'none';
 
             const query = `${artist} ${song}`;
 
@@ -337,27 +335,48 @@
                 { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, class: 'tidal' }
             ];
 
-            try {
-                // --- 1. BUSCAR NO APPLE MUSIC (COM CORREÇÃO DE PAÍS) ---
-                const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR`; // Adicionado &country=BR
-                const itunesResponse = await fetch(itunesUrl);
-                const itunesData = await itunesResponse.json();
+            let itunesData = null; // Variável para guardar dados do iTunes
+            let itunesResponseOk = false; // Flag para status da resposta
 
-                if (itunesData.results && itunesData.results.length > 0) {
+            try {
+                // --- 1. BUSCAR NO APPLE MUSIC (COM LOGS DETALHADOS) ---
+                const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR`;
+                console.log("Tentando buscar no iTunes:", itunesUrl);
+
+                const itunesResponse = await fetch(itunesUrl);
+                itunesResponseOk = itunesResponse.ok; // Guarda se a resposta foi 2xx
+                console.log("Resposta iTunes (status):", itunesResponse.status);
+
+                if (itunesResponseOk) {
+                    try {
+                        itunesData = await itunesResponse.json();
+                        console.log("Dados iTunes recebidos:", JSON.stringify(itunesData));
+                    } catch (jsonError) {
+                        console.error("Erro ao parsear JSON do iTunes:", jsonError);
+                        // A resposta foi ok, mas não era JSON válido. Trata como se não tivesse encontrado.
+                        itunesData = { results: [] }; // Define como vazio para o próximo if falhar
+                    }
+                } else {
+                    // A resposta não foi 2xx (ex: 404, 500)
+                    console.error("Erro na resposta da API do iTunes, status:", itunesResponse.status);
+                     itunesData = { results: [] }; // Define como vazio
+                }
+
+
+                if (itunesData && itunesData.results && itunesData.results.length > 0) {
+                    console.log("Música encontrada no iTunes!");
                     const track = itunesData.results[0];
-                    // Pega a URL da arte e ajusta para um tamanho maior (300x300)
                     if (track.artworkUrl100) {
                         artwork.src = track.artworkUrl100.replace('100x100', '300x300');
-                        artwork.style.display = 'block'; // Mostra a imagem
+                        artwork.style.display = 'block';
                     }
                     songTitle.innerText = track.trackName;
                     songArtist.innerText = track.artistName;
                     platformsToCreate.unshift({ name: 'Apple Music', url: track.trackViewUrl, class: 'appleMusic' });
                 } else {
-                    console.warn('Música não encontrada no iTunes/Apple Music para a busca:', query);
-                    songTitle.innerText = song; // Usa o nome da URL como fallback
-                    songArtist.innerText = artist; // Usa o nome da URL como fallback
-                    // artwork.style.display = 'none'; // Já está escondido por padrão
+                    console.warn('Música NÃO encontrada no iTunes/Apple Music para a busca:', query);
+                    songTitle.innerText = song;
+                    songArtist.innerText = artist;
                 }
                 // --- FIM DA BUSCA NO APPLE MUSIC ---
 
@@ -374,74 +393,24 @@
 
                 // 4. CRIAR OS BOTÕES SOCIAIS
                 let socialLinksFound = false;
-
-                if (tiktokUrl) {
-                    createSocialButton(
-                        'Usar Som no TikTok',
-                        tiktokUrl,
-                        'tiktok-button',
-                        query
-                    );
-                    socialLinksFound = true;
-                }
-
-                if (instagramUrl) {
-                    createSocialButton(
-                        'Usar Som no Instagram',
-                        instagramUrl,
-                        'instagram-button',
-                        query
-                    );
-                    socialLinksFound = true;
-                }
-
-                if (socialLinksFound) {
-                    socialLinksContainer.style.display = 'block';
-                } else {
-                    socialLinksContainer.style.display = 'none';
-                }
+                if (tiktokUrl) { createSocialButton('Usar Som no TikTok', tiktokUrl, 'tiktok-button', query); socialLinksFound = true; }
+                if (instagramUrl) { createSocialButton('Usar Som no Instagram', instagramUrl, 'instagram-button', query); socialLinksFound = true; }
+                socialLinksContainer.style.display = socialLinksFound ? 'block' : 'none';
 
                 // 5. CONFIGURAR O BOTÃO DE COMPARTILHAR
                 const shareTitle = `${songTitle.innerText} por ${songArtist.innerText}`;
                 const shareUrl = window.location.href;
-
-                if (navigator.share) {
-                    shareButton.innerText = 'Compartilhar Link 📲';
-                    shareButton.classList.remove('copy-mode');
-
-                    shareButton.onclick = (e) => {
-                        e.preventDefault();
-                        navigator.share({
-                            title: shareTitle,
-                            text: `Ouça "${shareTitle}" em todas as plataformas:`,
-                            url: shareUrl
-                        }).then(() => {
-                            trackClick('click_share', 'Compartilhar (Nativo)', query);
-                        }).catch(err => console.error('Erro no share:', err));
-                    };
-                } else if (navigator.clipboard) {
-                    shareButton.innerText = 'Copiar Link (Compartilhar)';
-                    shareButton.classList.add('copy-mode');
-
-                    shareButton.onclick = (e) => {
-                        e.preventDefault();
-                        navigator.clipboard.writeText(shareUrl).then(() => {
-                            shareButton.innerText = 'Link Copiado! 👍';
-                            trackClick('click_share', 'Copiar Link (Desktop)', query);
-                            setTimeout(() => { shareButton.innerText = 'Copiar Link (Compartilhar)'; }, 2000);
-                        }).catch(err => console.error('Erro ao copiar:', err));
-                    };
-                }
-
-                if (navigator.share || navigator.clipboard) {
-                    shareButton.style.display = 'block';
-                }
+                setupShareButton(shareTitle, shareUrl, query);
 
                 // 6. EXIBIR TUDO
                 resultsContainer.style.display = 'block';
 
             } catch (error) {
-                console.error("Erro na função searchMusic:", error);
+                console.error("Erro GERAL na função searchMusic:", error);
+                // Tenta mostrar a resposta crua do iTunes se o JSON falhou antes
+                if (!itunesResponseOk && itunesResponse) { // Se a resposta não foi OK
+                    itunesResponse.text().then(text => console.error("Resposta crua do iTunes (erro):", text));
+                }
                 alert('Ocorreu um erro ao buscar os dados da música. Verifique o console para mais detalhes.');
             } finally {
                 loadingMessage.style.display = 'none';
@@ -456,15 +425,8 @@
             button.className = 'music-platform-button ' + platformClass;
             button.dataset.platform = platformName;
             button.dataset.class = platformClass;
-
-            button.innerHTML = `
-                <span class="platform-name">${platformName}</span>
-            `;
-
-            button.addEventListener('click', (e) => {
-                trackClick('click_streaming', platformName, songQuery);
-            });
-
+            button.innerHTML = `<span class="platform-name">${platformName}</span>`;
+            button.addEventListener('click', (e) => { trackClick('click_streaming', platformName, songQuery); });
             linksContainer.appendChild(button);
         }
 
@@ -475,21 +437,48 @@
             button.target = '_blank';
             button.className = 'social-button ' + cssClass;
             button.innerText = text;
-
-            button.addEventListener('click', (e) => {
-                trackClick('click_social_sound', text, songQuery);
-            });
-
+            button.addEventListener('click', (e) => { trackClick('click_social_sound', text, songQuery); });
             socialButtonsContainer.appendChild(button);
+        }
+
+        // Função para configurar o botão Share/Copiar
+        function setupShareButton(shareTitle, shareUrl, query){
+            if (navigator.share) {
+                shareButton.innerText = 'Compartilhar Link 📲';
+                shareButton.classList.remove('copy-mode');
+                shareButton.onclick = (e) => {
+                    e.preventDefault();
+                    navigator.share({ title: shareTitle, text: `Ouça "${shareTitle}" em todas as plataformas:`, url: shareUrl })
+                        .then(() => { trackClick('click_share', 'Compartilhar (Nativo)', query); })
+                        .catch(err => console.error('Erro no share:', err));
+                };
+                 shareButton.style.display = 'block';
+            } else if (navigator.clipboard) {
+                shareButton.innerText = 'Copiar Link (Compartilhar)';
+                shareButton.classList.add('copy-mode');
+                shareButton.onclick = (e) => {
+                    e.preventDefault();
+                    navigator.clipboard.writeText(shareUrl)
+                        .then(() => {
+                            shareButton.innerText = 'Link Copiado! 👍';
+                            trackClick('click_share', 'Copiar Link (Desktop)', query);
+                            setTimeout(() => { shareButton.innerText = 'Copiar Link (Compartilhar)'; }, 2000);
+                        })
+                        .catch(err => console.error('Erro ao copiar:', err));
+                };
+                 shareButton.style.display = 'block';
+            } else {
+                 shareButton.style.display = 'none'; // Esconde se nenhuma API funcionar
+            }
         }
 
         // Função especial para buscar no Deezer (JSONP)
         function searchDeezer(query) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                const callbackName = 'deezerCallback';
+                const callbackName = 'deezerCallback' + Date.now(); // Nome único para evitar conflitos
                 window[callbackName] = function(data) {
-                    document.body.removeChild(script);
+                    try { document.body.removeChild(script); } catch(e) {} // Tenta remover
                     delete window[callbackName];
                     if (data && data.data && data.data.length > 0) {
                         resolve(data.data[0]);
@@ -500,10 +489,20 @@
                 script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&output=jsonp&callback=${callbackName}`;
                 script.onerror = () => {
                     console.error('Falha ao carregar API do Deezer via JSONP');
+                    try { document.body.removeChild(script); } catch(e) {}
                     delete window[callbackName];
                     reject(new Error('Falha ao carregar API do Deezer'));
                 };
                 document.body.appendChild(script);
+                 // Timeout para garantir limpeza se a API falhar silenciosamente
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        console.warn('Timeout na busca do Deezer');
+                        try { document.body.removeChild(script); } catch(e) {}
+                        delete window[callbackName];
+                        reject(new Error('Timeout na busca do Deezer'));
+                    }
+                }, 5000); // 5 segundos de timeout
             });
         }
     </script>
