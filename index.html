@@ -308,6 +308,14 @@
             } else {
                 console.warn('Google Analytics (gtag) não encontrado.');
             }
+            // TikTok Pixel
+    if (typeof ttq !== 'undefined') {
+        ttq.track('ClickButton', {
+            content_name: songQuery,
+            content_type: platformName,
+            description: eventName
+        });
+    }
         }
 
         // --- FUNÇÕES PRINCIPAIS ---
