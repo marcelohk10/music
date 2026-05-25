@@ -308,30 +308,31 @@
         function trackEvent(eventName, params = {}, onTracked) {
             console.log(`Evento: ${eventName}`, params);
 
-            if (window.dataLayer) {
-                window.dataLayer.push({
-                    event: eventName,
-                    ...params
-                });
-            }
-
             if (typeof gtag === 'function') {
                 gtag('event', eventName, {
-                    ...params,
+                    send_to: 'G-2VQ0ZJ5JEY',
+                    musica: params.musica || '',
+                    link_tipo: params.link_tipo || '',
+                    destination_url: params.destination_url || '',
+                    platform_class: params.platform_class || '',
+                    platform_name: params.platform_name || '',
+                    artista: params.artista || '',
+                    musica_busca: params.musica_busca || '',
+                    streaming_count: params.streaming_count || undefined,
+                    social_count: params.social_count || undefined,
+                    has_artwork: params.has_artwork || undefined,
+                    has_artwork_url: params.has_artwork_url || undefined,
+                    has_tiktok_url: params.has_tiktok_url || undefined,
+                    has_instagram_url: params.has_instagram_url || undefined,
                     transport_type: 'beacon',
                     event_callback: typeof onTracked === 'function' ? onTracked : undefined,
                     event_timeout: 1000
                 });
-            } else if (typeof onTracked === 'function') {
-                onTracked();
+                return;
             }
 
-            if (typeof ttq !== 'undefined') {
-                ttq.track('ClickButton', {
-                    content_name: params.musica || params.song_query || '',
-                    content_type: params.link_tipo || params.platform_name || '',
-                    description: eventName
-                });
+            if (typeof onTracked === 'function') {
+                onTracked();
             }
         }
 
