@@ -12,7 +12,7 @@
       gtag('js', new Date());
 
       gtag('config', 'G-2VQ0ZJ5JEY');
-    </script> 
+    </script>
     <!-- TikTok Pixel -->
 <script>
 !function (w, d, t) {
@@ -291,61 +291,31 @@
                     });
                 }
 
-                trackEvent('song_landing_view', {
-                    musica: `${artistaDaUrl} ${musicaDaUrl}`,
-                    artista: artistaDaUrl,
-                    has_artwork_url: Boolean(artworkUrlParam),
-                    has_tiktok_url: Boolean(tiktokUrl),
-                    has_instagram_url: Boolean(instagramUrl)
-                });
-
                 searchButton.click();
             }
         });
 
-        // --- FUNÇÃO DE CONTADOR ---
+        // --- FUNÇÃO DE CONTADOR (APENAS GOOGLE ANALYTICS) ---
 
-        function trackEvent(eventName, params = {}, onTracked) {
-            console.log(`Evento: ${eventName}`, params);
+        function trackClick(eventName, platformName, songQuery) {
+            console.log(`Evento: ${eventName}, Plataforma: ${platformName}, Música: ${songQuery}`);
 
             if (typeof gtag === 'function') {
                 gtag('event', eventName, {
-                    send_to: 'G-2VQ0ZJ5JEY',
-                    musica: params.musica || '',
-                    link_tipo: params.link_tipo || '',
-                    destination_url: params.destination_url || '',
-                    platform_class: params.platform_class || '',
-                    platform_name: params.platform_name || '',
-                    artista: params.artista || '',
-                    musica_busca: params.musica_busca || '',
-                    streaming_count: params.streaming_count || undefined,
-                    social_count: params.social_count || undefined,
-                    has_artwork: params.has_artwork || undefined,
-                    has_artwork_url: params.has_artwork_url || undefined,
-                    has_tiktok_url: params.has_tiktok_url || undefined,
-                    has_instagram_url: params.has_instagram_url || undefined,
-                    transport_type: 'beacon',
-                    event_callback: typeof onTracked === 'function' ? onTracked : undefined,
-                    event_timeout: 1000
+                    'link_tipo': platformName,
+                    'musica': songQuery
                 });
-                return;
-            }
-
-            if (typeof onTracked === 'function') {
-                onTracked();
-            }
-        }
-
-        function openTrackedUrl(url, onTracked) {
-            const navigate = () => {
-                window.location.href = url;
-            };
-
-            if (typeof onTracked === 'function') {
-                onTracked(navigate);
             } else {
-                navigate();
+                console.warn('Google Analytics (gtag) não encontrado.');
             }
+            // TikTok Pixel
+    if (typeof ttq !== 'undefined') {
+        ttq.track('ClickButton', {
+            content_name: songQuery,
+            content_type: platformName,
+            description: eventName
+        });
+    }
         }
 
         // --- FUNÇÕES PRINCIPAIS ---
@@ -371,15 +341,6 @@
             artwork.style.display = 'none';
 
             const query = `${artist} ${song}`;
-
-            trackEvent('search_submitted', {
-                artista: artist,
-                musica: song,
-                musica_busca: query,
-                has_artwork_url: Boolean(artworkUrlParam),
-                has_tiktok_url: Boolean(tiktokUrl),
-                has_instagram_url: Boolean(instagramUrl)
-            });
 
             // Lista de plataformas de streaming
             const platformsToCreate = [
@@ -482,15 +443,6 @@
                 // --- 7. EXIBIR TUDO ---
                 resultsContainer.style.display = 'block';
 
-                trackEvent('results_rendered', {
-                    artista: artist,
-                    musica: song,
-                    musica_busca: query,
-                    streaming_count: platformsToCreate.length,
-                    social_count: socialLinksFound ? 2 : 0,
-                    has_artwork: foundArtwork
-                });
-
             } catch (error) {
                 console.error("Erro GERAL na função searchMusic:", error);
                 alert('Ocorreu um erro ao buscar os dados da música. Verifique o console para mais detalhes.');
@@ -508,18 +460,7 @@
             button.dataset.platform = platformName;
             button.dataset.class = platformClass;
             button.innerHTML = `<span class="platform-name">${platformName}</span>`;
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                openTrackedUrl(url, (navigate) => {
-                    trackEvent('click_streaming', {
-                        link_tipo: platformName,
-                        musica: songQuery,
-                        destination_url: url,
-                        platform_class: platformClass,
-                        platform_name: platformName
-                    }, navigate);
-                });
-            });
+            button.addEventListener('click', (e) => { trackClick('click_streaming', platformName, songQuery); });
             linksContainer.appendChild(button);
         }
 
@@ -530,18 +471,7 @@
             button.target = '_blank';
             button.className = 'social-button ' + cssClass;
             button.innerText = text;
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                openTrackedUrl(url, (navigate) => {
-                    trackEvent('click_social_sound', {
-                        link_tipo: text,
-                        musica: songQuery,
-                        destination_url: url,
-                        platform_class: cssClass,
-                        platform_name: text
-                    }, navigate);
-                });
-            });
+            button.addEventListener('click', (e) => { trackClick('click_social_sound', text, songQuery); });
             socialButtonsContainer.appendChild(button);
         }
 
@@ -553,13 +483,7 @@
                 shareButton.onclick = (e) => {
                     e.preventDefault();
                     navigator.share({ title: shareTitle, text: `Ouça "${shareTitle}" em todas as plataformas:`, url: shareUrl })
-                        .then(() => {
-                            trackEvent('click_share', {
-                                link_tipo: 'Compartilhar (Nativo)',
-                                musica: query,
-                                destination_url: shareUrl
-                            });
-                        })
+                        .then(() => { trackClick('click_share', 'Compartilhar (Nativo)', query); })
                         .catch(err => console.error('Erro no share:', err));
                 };
                  shareButton.style.display = 'block';
@@ -571,11 +495,7 @@
                     navigator.clipboard.writeText(shareUrl)
                         .then(() => {
                             shareButton.innerText = 'Link Copiado! 👍';
-                            trackEvent('click_share', {
-                                link_tipo: 'Copiar Link (Desktop)',
-                                musica: query,
-                                destination_url: shareUrl
-                            });
+                            trackClick('click_share', 'Copiar Link (Desktop)', query);
                             setTimeout(() => { shareButton.innerText = 'Copiar Link (Compartilhar)'; }, 2000);
                         })
                         .catch(err => console.error('Erro ao copiar:', err));
