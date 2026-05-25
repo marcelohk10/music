@@ -336,13 +336,8 @@
         }
 
         function openTrackedUrl(url, onTracked) {
-            const popup = window.open('about:blank', '_blank', 'noopener,noreferrer');
             const navigate = () => {
-                if (popup && !popup.closed) {
-                    popup.location.href = url;
-                } else {
-                    window.location.href = url;
-                }
+                window.location.href = url;
             };
 
             if (typeof onTracked === 'function') {
