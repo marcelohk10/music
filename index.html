@@ -291,31 +291,65 @@
                     });
                 }
 
+                trackEvent('song_landing_view', {
+                    musica: `${artistaDaUrl} ${musicaDaUrl}`,
+                    artista: artistaDaUrl,
+                    has_artwork_url: Boolean(artworkUrlParam),
+                    has_tiktok_url: Boolean(tiktokUrl),
+                    has_instagram_url: Boolean(instagramUrl)
+                });
+
                 searchButton.click();
             }
         });
 
-        // --- FUNÇÃO DE CONTADOR (APENAS GOOGLE ANALYTICS) ---
+        // --- FUNÇÃO DE CONTADOR ---
 
-        function trackClick(eventName, platformName, songQuery) {
-            console.log(`Evento: ${eventName}, Plataforma: ${platformName}, Música: ${songQuery}`);
+        function trackEvent(eventName, params = {}, onTracked) {
+            console.log(`Evento: ${eventName}`, params);
+
+            if (window.dataLayer) {
+                window.dataLayer.push({
+                    event: eventName,
+                    ...params
+                });
+            }
 
             if (typeof gtag === 'function') {
                 gtag('event', eventName, {
-                    'link_tipo': platformName,
-                    'musica': songQuery
+                    ...params,
+                    transport_type: 'beacon',
+                    event_callback: typeof onTracked === 'function' ? onTracked : undefined,
+                    event_timeout: 1000
                 });
-            } else {
-                console.warn('Google Analytics (gtag) não encontrado.');
+            } else if (typeof onTracked === 'function') {
+                onTracked();
             }
-            // TikTok Pixel
-    if (typeof ttq !== 'undefined') {
-        ttq.track('ClickButton', {
-            content_name: songQuery,
-            content_type: platformName,
-            description: eventName
-        });
-    }
+
+            if (typeof ttq !== 'undefined') {
+                ttq.track('ClickButton', {
+                    content_name: params.musica || params.song_query || '',
+                    content_type: params.link_tipo || params.platform_name || '',
+                    description: eventName
+                });
+            }
+        }
+
+        function openTrackedUrl(url, onTracked) {
+            const popup = window.open('about:blank', '_blank', 'noopener,noreferrer');
+            const navigate = () => {
+                if (popup && !popup.closed) {
+                    popup.location.href = url;
+                } else {
+                    window.location.href = url;
+                }
+            };
+
+            if (typeof onTracked === 'function') {
+                onTracked(navigate);
+            } else {
+                navigate();
+            }
         }
 
         // --- FUNÇÕES PRINCIPAIS ---
@@ -341,6 +375,15 @@
             artwork.style.display = 'none';
 
             const query = `${artist} ${song}`;
+
+            trackEvent('search_submitted', {
+                artista: artist,
+                musica: song,
+                musica_busca: query,
+                has_artwork_url: Boolean(artworkUrlParam),
+                has_tiktok_url: Boolean(tiktokUrl),
+                has_instagram_url: Boolean(instagramUrl)
+            });
 
             // Lista de plataformas de streaming
             const platformsToCreate = [
@@ -443,6 +486,15 @@
                 // --- 7. EXIBIR TUDO ---
                 resultsContainer.style.display = 'block';
 
+                trackEvent('results_rendered', {
+                    artista: artist,
+                    musica: song,
+                    musica_busca: query,
+                    streaming_count: platformsToCreate.length,
+                    social_count: socialLinksFound ? 2 : 0,
+                    has_artwork: foundArtwork
+                });
+
             } catch (error) {
                 console.error("Erro GERAL na função searchMusic:", error);
                 alert('Ocorreu um erro ao buscar os dados da música. Verifique o console para mais detalhes.');
@@ -460,7 +512,18 @@
             button.dataset.platform = platformName;
             button.dataset.class = platformClass;
             button.innerHTML = `<span class="platform-name">${platformName}</span>`;
-            button.addEventListener('click', (e) => { trackClick('click_streaming', platformName, songQuery); });
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                openTrackedUrl(url, (navigate) => {
+                    trackEvent('click_streaming', {
+                        link_tipo: platformName,
+                        musica: songQuery,
+                        destination_url: url,
+                        platform_class: platformClass,
+                        platform_name: platformName
+                    }, navigate);
+                });
+            });
             linksContainer.appendChild(button);
         }
 
@@ -471,7 +534,18 @@
             button.target = '_blank';
             button.className = 'social-button ' + cssClass;
             button.innerText = text;
-            button.addEventListener('click', (e) => { trackClick('click_social_sound', text, songQuery); });
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                openTrackedUrl(url, (navigate) => {
+                    trackEvent('click_social_sound', {
+                        link_tipo: text,
+                        musica: songQuery,
+                        destination_url: url,
+                        platform_class: cssClass,
+                        platform_name: text
+                    }, navigate);
+                });
+            });
             socialButtonsContainer.appendChild(button);
         }
 
@@ -483,7 +557,13 @@
                 shareButton.onclick = (e) => {
                     e.preventDefault();
                     navigator.share({ title: shareTitle, text: `Ouça "${shareTitle}" em todas as plataformas:`, url: shareUrl })
-                        .then(() => { trackClick('click_share', 'Compartilhar (Nativo)', query); })
+                        .then(() => {
+                            trackEvent('click_share', {
+                                link_tipo: 'Compartilhar (Nativo)',
+                                musica: query,
+                                destination_url: shareUrl
+                            });
+                        })
                         .catch(err => console.error('Erro no share:', err));
                 };
                  shareButton.style.display = 'block';
@@ -495,7 +575,11 @@
                     navigator.clipboard.writeText(shareUrl)
                         .then(() => {
                             shareButton.innerText = 'Link Copiado! 👍';
-                            trackClick('click_share', 'Copiar Link (Desktop)', query);
+                            trackEvent('click_share', {
+                                link_tipo: 'Copiar Link (Desktop)',
+                                musica: query,
+                                destination_url: shareUrl
+                            });
                             setTimeout(() => { shareButton.innerText = 'Copiar Link (Compartilhar)'; }, 2000);
                         })
                         .catch(err => console.error('Erro ao copiar:', err));
