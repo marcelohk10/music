@@ -127,6 +127,48 @@
             gap: 1px;
             background-color: #282828;
         }
+        #embed-container {
+            display: none;
+            padding: 20px 25px;
+            background-color: #191919;
+            border-top: 1px solid #282828;
+            border-bottom: 1px solid #282828;
+            text-align: left;
+        }
+        #embed-container h3 {
+            margin: 0 0 14px 0;
+            color: #b3b3b3;
+            font-size: 1em;
+            text-transform: uppercase;
+        }
+        .embed-card {
+            margin-bottom: 14px;
+            border: 1px solid #2f2f2f;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #111;
+        }
+        .embed-card:last-child {
+            margin-bottom: 0;
+        }
+        .embed-card-header {
+            padding: 12px 14px;
+            font-weight: 700;
+            color: #fff;
+            background: #1d1d1d;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .embed-frame {
+            display: block;
+            width: 100%;
+            border: 0;
+            background: #000;
+        }
+        .embed-note {
+            padding: 10px 14px 14px;
+            color: #b3b3b3;
+            font-size: 0.9em;
+        }
         .music-platform-button {
             display: flex;
             justify-content: space-between;
@@ -201,6 +243,13 @@
         #share-button.copy-mode {
              background-color: #555; /* Cinza */
         }
+        #preview-button {
+            background-color: #ff7a00;
+            margin-top: 10px;
+        }
+        #preview-button.is-playing {
+            background-color: #d95f00;
+        }
 
         .tiktok-button {
             background-color: #000000; /* Preto TikTok */
@@ -232,10 +281,15 @@
                 <h2 id="song-title"></h2>
                 <p id="song-artist"></p>
                 <button id="share-button" class="social-button" style="display: none;"></button>
+                <button id="preview-button" class="social-button" style="display: none;"></button>
             </div>
-
             <div id="links-container">
                 </div>
+
+            <div id="embed-container">
+                <h3>Ouvir aqui também</h3>
+                <div id="embed-content"></div>
+            </div>
 
             <div id="social-links-container">
                 <h3>Usar esta música em seu post</h3>
@@ -257,11 +311,14 @@
         const songTitle = document.getElementById('song-title');
         const songArtist = document.getElementById('song-artist');
         const linksContainer = document.getElementById('links-container');
+        const embedContainer = document.getElementById('embed-container');
+        const embedContent = document.getElementById('embed-content');
 
         const socialLinksContainer = document.getElementById('social-links-container');
         const socialButtonsContainer = document.getElementById('social-buttons');
 
         const shareButton = document.getElementById('share-button');
+        const previewButton = document.getElementById('preview-button');
         const searchBox = document.getElementById('search-box');
         const introText = document.getElementById('intro-text');
 
@@ -272,12 +329,19 @@
         const artworkUrlParam = params.get('artwork_url');
         const tiktokUrl = params.get('tiktok_url');
         const instagramUrl = params.get('ig_url');
+        const youtubeIdParam = params.get('youtube_id');
+        const youtubeUrlParam = params.get('youtube_url');
+        const soundcloudUrlParam = params.get('soundcloud_url');
 
         let currentSongContext = {
             artista: '',
             musica: '',
             source: 'manual'
         };
+        let currentPreviewUrl = '';
+        let previewAudio = null;
+
+        const canonicalSiteBaseUrl = 'https://marcelohk10.github.io/music/';
 
         function setCurrentSongContext(artista, musica, source) {
             currentSongContext = {
@@ -287,10 +351,192 @@
             };
         }
 
+        function getSharePageUrl() {
+            if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+                return window.location.href;
+            }
+
+            const shareUrl = new URL(canonicalSiteBaseUrl);
+            shareUrl.search = window.location.search;
+            shareUrl.hash = window.location.hash;
+            return shareUrl.toString();
+        }
+
+        function buildShareText(songName, artistName) {
+            if (songName && artistName) {
+                return `Ouça "${songName}" de ${artistName} em todas as plataformas:`;
+            }
+
+            if (songName) {
+                return `Ouça "${songName}" em todas as plataformas:`;
+            }
+
+            return 'Ouça esta música em todas as plataformas:';
+        }
+
+        function getActiveTrackQuery() {
+            const artist = currentSongContext.artista || artistInput.value || '';
+            const song = currentSongContext.musica || songInput.value || '';
+            return [artist, song].filter(Boolean).join(' ');
+        }
+
+        function extractYouTubeId(input) {
+            if (!input) return '';
+            if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+                return input;
+            }
+
+            try {
+                const url = new URL(input);
+                if (url.hostname.includes('youtu.be')) {
+                    return url.pathname.replace('/', '').trim();
+                }
+
+                const v = url.searchParams.get('v');
+                if (v) return v;
+
+                const embedMatch = url.pathname.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+                if (embedMatch) return embedMatch[1];
+            } catch (error) {
+                return '';
+            }
+
+            return '';
+        }
+
+        function renderEmbeds() {
+            embedContent.innerHTML = '';
+
+            const youtubeId = extractYouTubeId(youtubeIdParam || youtubeUrlParam);
+            const trackQuery = getActiveTrackQuery();
+
+            const hasYoutube = Boolean(youtubeId);
+            const hasSoundCloud = Boolean(soundcloudUrlParam);
+
+            if (!hasYoutube && !hasSoundCloud) {
+                if (!trackQuery) {
+                    embedContainer.style.display = 'none';
+                    return;
+                }
+
+                const fallbackCard = document.createElement('div');
+                fallbackCard.className = 'embed-card';
+                fallbackCard.innerHTML = `
+                    <div class="embed-card-header">Tentar ouvir em outro lugar</div>
+                    <div class="embed-note">Não achei embed direto. Você ainda pode buscar a mesma música nestas plataformas.</div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; padding: 0 14px 14px;">
+                        <a class="help-pill primary" href="#" data-youtube-search="1">Buscar no YouTube</a>
+                    </div>
+                `;
+                embedContent.appendChild(fallbackCard);
+                fallbackCard.querySelector('[data-youtube-search="1"]').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(trackQuery)}`;
+                    trackExternalClick('click_youtube', {
+                        link_tipo: 'Buscar no YouTube',
+                        musica: currentSongContext.musica || songInput.value || '',
+                        musica_origem: currentSongContext.musica || songInput.value || '',
+                        artista_origem: currentSongContext.artista || artistInput.value || '',
+                        source: currentSongContext.source || 'manual',
+                        destination_url: url
+                    }, url);
+                });
+                embedContainer.style.display = 'block';
+                return;
+            }
+
+            if (hasYoutube) {
+                const youtubeCard = document.createElement('div');
+                youtubeCard.className = 'embed-card';
+                youtubeCard.innerHTML = `
+                    <div class="embed-card-header">YouTube</div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; padding: 12px 14px 0;">
+                        <a class="help-pill primary" href="#" data-youtube-open="1">Abrir no YouTube</a>
+                    </div>
+                    <iframe
+                        class="embed-frame"
+                        height="315"
+                        src="https://www.youtube.com/embed/${youtubeId}"
+                        title="Player do YouTube"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                    ></iframe>
+                `;
+                embedContent.appendChild(youtubeCard);
+                youtubeCard.querySelector('[data-youtube-open="1"]').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = `https://www.youtube.com/watch?v=${youtubeId}`;
+                    trackExternalClick('click_youtube', {
+                        link_tipo: 'Abrir no YouTube',
+                        musica: currentSongContext.musica || songInput.value || '',
+                        musica_origem: currentSongContext.musica || songInput.value || '',
+                        artista_origem: currentSongContext.artista || artistInput.value || '',
+                        source: currentSongContext.source || 'manual',
+                        destination_url: url
+                    }, url);
+                });
+            }
+
+            if (hasSoundCloud) {
+                const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(soundcloudUrlParam)}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&visual=true`;
+                const soundcloudCard = document.createElement('div');
+                soundcloudCard.className = 'embed-card';
+                soundcloudCard.innerHTML = `
+                    <div class="embed-card-header">SoundCloud</div>
+                    <iframe
+                        class="embed-frame"
+                        height="166"
+                        scrolling="no"
+                        allow="autoplay"
+                        src="${embedUrl}"
+                        title="Player do SoundCloud"
+                        loading="lazy"
+                    ></iframe>
+                `;
+                embedContent.appendChild(soundcloudCard);
+            }
+
+            embedContainer.style.display = 'block';
+        }
+
 
         searchButton.addEventListener('click', searchMusic);
+        previewButton.addEventListener('click', () => {
+            if (!currentPreviewUrl) return;
+
+            if (!previewAudio) {
+                previewAudio = new Audio(currentPreviewUrl);
+                previewAudio.addEventListener('ended', () => {
+                    previewButton.innerText = 'Ouvir prévia de 30s';
+                    previewButton.classList.remove('is-playing');
+                });
+            }
+
+            if (previewAudio.paused) {
+                previewAudio.play().then(() => {
+                    previewButton.innerText = 'Pausar prévia';
+                    previewButton.classList.add('is-playing');
+                    trackEvent('click_preview', {
+                        musica: currentSongContext.musica || songInput.value || '',
+                        link_tipo: 'Preview iTunes',
+                        musica_origem: currentSongContext.musica || songInput.value || '',
+                        artista_origem: currentSongContext.artista || artistInput.value || '',
+                        source: currentSongContext.source || 'manual',
+                        destination_url: currentPreviewUrl
+                    });
+                }).catch(err => {
+                    console.error('Erro ao tocar prévia:', err);
+                });
+            } else {
+                previewAudio.pause();
+                previewButton.innerText = 'Ouvir prévia de 30s';
+                previewButton.classList.remove('is-playing');
+            }
+        });
 
         window.addEventListener('load', () => {
+            renderEmbeds();
             if (artistaDaUrl && musicaDaUrl) {
                 if (searchBox) searchBox.style.display = 'none';
                 if (introText) introText.style.display = 'none';
@@ -357,16 +603,21 @@
             }
         }
 
-        function openTrackedUrl(url, onTracked) {
-            const navigate = () => {
+        function trackClickAndNavigate(eventName, params, url) {
+            let navigated = false;
+            const navigateOnce = () => {
+                if (navigated) return;
+                navigated = true;
                 window.location.href = url;
             };
 
-            if (typeof onTracked === 'function') {
-                onTracked(navigate);
-            } else {
-                navigate();
-            }
+            trackEvent(eventName, params, navigateOnce);
+            setTimeout(navigateOnce, 600);
+        }
+
+        function trackExternalClick(eventName, params, url) {
+            trackEvent(eventName, params);
+            window.open(url, '_blank', 'noopener,noreferrer');
         }
 
         // --- FUNÇÕES PRINCIPAIS ---
@@ -390,6 +641,14 @@
             linksContainer.innerHTML = '';
             socialButtonsContainer.innerHTML = '';
             artwork.style.display = 'none';
+            previewButton.style.display = 'none';
+            previewButton.innerText = 'Ouvir prévia de 30s';
+            previewButton.classList.remove('is-playing');
+            if (previewAudio) {
+                previewAudio.pause();
+                previewAudio = null;
+            }
+            currentPreviewUrl = '';
 
             const query = `${artist} ${song}`;
             setCurrentSongContext(artist, song, 'manual');
@@ -441,6 +700,10 @@
                             }
                             songTitle.innerText = track.trackName;
                             songArtist.innerText = track.artistName;
+                            currentPreviewUrl = track.previewUrl || '';
+                            previewButton.style.display = currentPreviewUrl ? 'block' : 'none';
+                            previewButton.innerText = 'Ouvir prévia de 30s';
+                            previewButton.classList.remove('is-playing');
                             platformsToCreate.unshift({ name: 'Apple Music', url: track.trackViewUrl, class: 'appleMusic' });
                         } else {
                             // API respondeu OK, mas sem resultados
@@ -472,6 +735,8 @@
                 if (!foundArtwork && songTitle.innerText === '') {
                     songTitle.innerText = song;
                     songArtist.innerText = artist;
+                    currentPreviewUrl = '';
+                    previewButton.style.display = 'none';
                 }
 
                 // --- 3. BUSCAR NO DEEZER ---
@@ -497,12 +762,14 @@
                 socialLinksContainer.style.display = socialLinksFound ? 'block' : 'none';
 
                 // --- 6. CONFIGURAR O BOTÃO DE COMPARTILHAR ---
-                const shareTitle = `${songTitle.innerText} por ${songArtist.innerText}`;
-                const shareUrl = window.location.href;
-                setupShareButton(shareTitle, shareUrl, query);
+                const shareSongTitle = songTitle.innerText;
+                const shareSongArtist = songArtist.innerText;
+                const shareUrl = getSharePageUrl();
+                setupShareButton(shareSongTitle, shareSongArtist, shareUrl, query);
 
                 // --- 7. EXIBIR TUDO ---
                 resultsContainer.style.display = 'block';
+                renderEmbeds();
 
                 trackEvent('results_rendered', {
                     artista: artist,
@@ -535,18 +802,16 @@
             button.innerHTML = `<span class="platform-name">${platformName}</span>`;
             button.addEventListener('click', (e) => {
                 e.preventDefault();
-                openTrackedUrl(url, (navigate) => {
-                    trackEvent('click_streaming', {
-                        link_tipo: platformName,
-                        musica: songQuery,
-                        musica_origem: currentSongContext.musica || songQuery,
-                        artista_origem: currentSongContext.artista || '',
-                        source: currentSongContext.source || 'manual',
-                        destination_url: url,
-                        platform_class: platformClass,
-                        platform_name: platformName
-                    }, navigate);
-                });
+                trackClickAndNavigate('click_streaming', {
+                    link_tipo: platformName,
+                    musica: songQuery,
+                    musica_origem: currentSongContext.musica || songQuery,
+                    artista_origem: currentSongContext.artista || '',
+                    source: currentSongContext.source || 'manual',
+                    destination_url: url,
+                    platform_class: platformClass,
+                    platform_name: platformName
+                }, url);
             });
             linksContainer.appendChild(button);
         }
@@ -560,30 +825,32 @@
             button.innerText = text;
             button.addEventListener('click', (e) => {
                 e.preventDefault();
-                openTrackedUrl(url, (navigate) => {
-                    trackEvent('click_social_sound', {
-                        link_tipo: text,
-                        musica: songQuery,
-                        musica_origem: currentSongContext.musica || songQuery,
-                        artista_origem: currentSongContext.artista || '',
-                        source: currentSongContext.source || 'manual',
-                        destination_url: url,
-                        platform_class: cssClass,
-                        platform_name: text
-                    }, navigate);
-                });
+                trackClickAndNavigate('click_social_sound', {
+                    link_tipo: text,
+                    musica: songQuery,
+                    musica_origem: currentSongContext.musica || songQuery,
+                    artista_origem: currentSongContext.artista || '',
+                    source: currentSongContext.source || 'manual',
+                    destination_url: url,
+                    platform_class: cssClass,
+                    platform_name: text
+                }, url);
             });
             socialButtonsContainer.appendChild(button);
         }
 
         // Função para configurar o botão Share/Copiar
-        function setupShareButton(shareTitle, shareUrl, query){
+        function setupShareButton(shareSongTitle, shareSongArtist, shareUrl, query){
             if (navigator.share) {
                 shareButton.innerText = 'Compartilhar Link 📲';
                 shareButton.classList.remove('copy-mode');
                 shareButton.onclick = (e) => {
                     e.preventDefault();
-                    navigator.share({ title: shareTitle, text: `Ouça "${shareTitle}" em todas as plataformas:`, url: shareUrl })
+                    navigator.share({
+                        title: shareSongTitle || 'Música',
+                        text: buildShareText(shareSongTitle, shareSongArtist),
+                        url: shareUrl
+                    })
                         .then(() => {
                             trackEvent('click_share', {
                                 link_tipo: 'Compartilhar (Nativo)',
