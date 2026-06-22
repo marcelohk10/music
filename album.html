@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Álbum</title>
+
+    <meta id="og-title" property="og:title" content="Álbum">
+    <meta id="og-description" property="og:description" content="Ouça em todas as plataformas.">
+    <meta id="og-image" property="og:image" content="">
+    <meta property="og:type" content="music.album">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VQ0ZJ5JEY"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-2VQ0ZJ5JEY');
+    </script>
+    <!-- TikTok Pixel -->
+    <script>
+    !function (w, d, t) {
+      w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._r=ttq._r||{},ttq._r[e]=n;var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+      ttq.load('CR7O36BC77U8234S88SG');
+      ttq.page();
+    }(window, document, 'ttq');
+    </script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* --- ESTADO DE LOADING / ERRO --- */
+        #state-loading, #state-error, #state-notfound {
+            text-align: center;
+            padding: 60px 20px;
+            color: #b3b3b3;
+            display: none;
+        }
+        #state-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-top-color: #1DB954;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #state-error h2, #state-notfound h2 { color: #fff; }
+
+        /* --- CABEÇALHO DO ÁLBUM --- */
+        #album-header {
+            display: none;
+            background: linear-gradient(180deg, #1e1e1e 0%, #181818 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+        }
+
+        .album-cover-wrap {
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            background: #282828;
+            overflow: hidden;
+        }
+        .album-cover-wrap img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .album-cover-placeholder {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5em;
+            background: #282828;
+        }
+
+        .album-meta {
+            padding: 20px 20px 0;
+            text-align: center;
+        }
+        .album-label {
+            font-size: 0.75em;
+            color: #b3b3b3;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .album-title {
+            font-size: 1.8em;
+            font-weight: 800;
+            margin: 0 0 4px;
+            line-height: 1.2;
+        }
+        .album-artist {
+            font-size: 1.1em;
+            color: #b3b3b3;
+            margin: 0 0 6px;
+        }
+        .album-info {
+            font-size: 0.85em;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        /* --- BOTÕES DE STREAMING DO ÁLBUM --- */
+        .streaming-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0 20px 20px;
+        }
+        .stream-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 1.05em;
+            font-weight: 800;
+            transition: opacity 0.2s, transform 0.15s;
+            border: none;
+            cursor: pointer;
+        }
+        .stream-btn:active { transform: scale(0.98); }
+        .stream-btn.spotify { background-color: #1DB954; color: #000; }
+        .stream-btn.youtube { background-color: #FF0000; }
+        .stream-btn.apple   { background: linear-gradient(135deg, #fc3c44, #f800a1); }
+        .stream-btn.deezer  { background-color: #FEAA2D; color: #000; }
+        .stream-btn.amazon  { background-color: #00A8E1; }
+        .stream-btn.secondary {
+            background: #282828;
+            color: #fff;
+            font-size: 0.95em;
+            padding: 12px;
+        }
+        .stream-btn .icon { font-size: 1.1em; }
+
+        .secondary-row {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px 20px;
+        }
+        .secondary-row .stream-btn { flex: 1; }
+
+        /* --- BOTÃO COMPARTILHAR --- */
+        .share-wrap {
+            padding: 0 20px 20px;
+        }
+        .share-btn {
+            display: block;
+            width: 100%;
+            padding: 13px;
+            border-radius: 8px;
+            background: #007bff;
+            color: #fff;
+            font-size: 1em;
+            font-weight: 700;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .share-btn:hover { opacity: 0.85; }
+        .share-btn.copied { background: #555; }
+
+        /* --- LISTA DE FAIXAS --- */
+        #tracklist-section {
+            display: none;
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+        }
+
+        .tracklist-header {
+            padding: 18px 20px 12px;
+            font-size: 0.75em;
+            color: #b3b3b3;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #282828;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid #282828;
+            text-decoration: none;
+            color: #fff;
+            gap: 14px;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .track-item:last-child { border-bottom: none; }
+        .track-item:hover { background: #282828; }
+        .track-item:active { background: #333; }
+
+        .track-number {
+            font-size: 0.9em;
+            color: #777;
+            min-width: 22px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .track-info {
+            flex: 1;
+            min-width: 0;
+            text-align: left;
+        }
+        .track-name {
+            font-size: 1em;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .track-duration {
+            font-size: 0.82em;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        .track-play-icon {
+            font-size: 0.85em;
+            color: #1DB954;
+            flex-shrink: 0;
+        }
+
+        /* --- FOOTER --- */
+        .footer-note {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8em;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div id="state-loading">
+        <div class="spinner"></div>
+        <p>Carregando álbum...</p>
+    </div>
+
+    <div id="state-notfound">
+        <h2>Álbum não encontrado</h2>
+        <p>Não encontrei "<span id="notfound-query"></span>" no iTunes. Verifique o nome do artista e do álbum na URL.</p>
+    </div>
+
+    <div id="state-error">
+        <h2>Erro ao carregar</h2>
+        <p>Não foi possível buscar os dados. Tente novamente mais tarde.</p>
+    </div>
+
+    <!-- CABEÇALHO DO ÁLBUM -->
+    <div id="album-header">
+        <div class="album-cover-wrap">
+            <div class="album-cover-placeholder" id="cover-placeholder">🎵</div>
+            <img id="album-cover" src="" alt="Capa do álbum" style="display:none;">
+        </div>
+        <div class="album-meta">
+            <div class="album-label">Álbum</div>
+            <h1 class="album-title" id="album-title">—</h1>
+            <p class="album-artist" id="album-artist">—</p>
+            <p class="album-info" id="album-info"></p>
+        </div>
+        <div class="streaming-buttons" id="streaming-buttons">
+            <!-- preenchido pelo JS -->
+        </div>
+        <div class="secondary-row" id="secondary-row">
+            <!-- preenchido pelo JS -->
+        </div>
+        <div class="share-wrap">
+            <button class="share-btn" id="share-btn">Compartilhar Álbum 📲</button>
+        </div>
+    </div>
+
+    <!-- LISTA DE FAIXAS -->
+    <div id="tracklist-section">
+        <div class="tracklist-header">Faixas</div>
+        <div id="tracklist"></div>
+    </div>
+
+    <div class="footer-note">Links de Música · marcelohk10.github.io</div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const albumParam   = params.get('album');
+    const artistParam  = params.get('artista');
+
+    const stateLoading  = document.getElementById('state-loading');
+    const stateNotfound = document.getElementById('state-notfound');
+    const stateError    = document.getElementById('state-error');
+    const albumHeader   = document.getElementById('album-header');
+    const tracklistSection = document.getElementById('tracklist-section');
+
+    const albumCover    = document.getElementById('album-cover');
+    const coverPlaceholder = document.getElementById('cover-placeholder');
+    const albumTitle    = document.getElementById('album-title');
+    const albumArtist   = document.getElementById('album-artist');
+    const albumInfo     = document.getElementById('album-info');
+    const streamingButtons = document.getElementById('streaming-buttons');
+    const secondaryRow  = document.getElementById('secondary-row');
+    const tracklist     = document.getElementById('tracklist');
+    const shareBtn      = document.getElementById('share-btn');
+
+    // URL base da página de faixa individual
+    const SONG_PAGE = 'index.html';
+    const canonicalBase = 'https://marcelohk10.github.io/music/album.html';
+
+    function trackEvent(name, extra = {}) {
+        if (typeof gtag === 'function') {
+            gtag('event', name, {
+                send_to: 'G-2VQ0ZJ5JEY',
+                album: albumParam || '',
+                artista: artistParam || '',
+                ...extra
+            });
+        }
+    }
+
+    function formatDuration(ms) {
+        const total = Math.round(ms / 1000);
+        const m = Math.floor(total / 60);
+        const s = total % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function buildAlbumQuery() {
+        return [artistParam, albumParam].filter(Boolean).join(' ');
+    }
+
+    function buildStreamingUrl(platform, query, isAlbum = true) {
+        const q = encodeURIComponent(query);
+        switch(platform) {
+            case 'spotify':     return `https://open.spotify.com/search/${q}`;
+            case 'youtube':     return `https://music.youtube.com/search?q=${q}`;
+            case 'apple':       return `https://music.apple.com/br/search?term=${q}`;
+            case 'deezer':      return `https://www.deezer.com/search/${q}`;
+            case 'amazon':      return `https://music.amazon.com.br/search/${q}`;
+            case 'soundcloud':  return `https://soundcloud.com/search?q=${q}`;
+            case 'tidal':       return `https://listen.tidal.com/search?q=${q}`;
+        }
+    }
+
+    function buildSongPageUrl(artist, song, artworkUrl) {
+        const u = new URL(SONG_PAGE, window.location.href);
+        u.searchParams.set('artista', artist);
+        u.searchParams.set('musica', song);
+        if (artworkUrl) u.searchParams.set('artwork_url', artworkUrl);
+        return u.toString();
+    }
+
+    function renderHeader(album, tracks) {
+        // Capa
+        if (album.artworkUrl100) {
+            const hires = album.artworkUrl100.replace('100x100bb', '600x600bb').replace('100x100', '600x600');
+            albumCover.src = hires;
+            albumCover.style.display = 'block';
+            coverPlaceholder.style.display = 'none';
+
+            // Open Graph
+            document.getElementById('og-title').setAttribute('content', `${album.collectionName} — ${album.artistName}`);
+            document.getElementById('og-description').setAttribute('content', `${tracks.length} faixas. Ouça em todas as plataformas.`);
+            document.getElementById('og-image').setAttribute('content', hires);
+        }
+
+        albumTitle.textContent  = album.collectionName;
+        albumArtist.textContent = album.artistName;
+
+        const year = album.releaseDate ? new Date(album.releaseDate).getFullYear() : '';
+        const genre = album.primaryGenreName || '';
+        albumInfo.textContent = [year, genre, `${tracks.length} faixas`].filter(Boolean).join(' · ');
+
+        document.title = `${album.collectionName} — ${album.artistName}`;
+
+        // Botões de streaming
+        const query = buildAlbumQuery();
+        const mainPlatforms = [
+            { key: 'spotify', label: 'Ouvir no Spotify',       cls: 'spotify', icon: '▶' },
+            { key: 'youtube', label: 'Ouvir no YouTube Music',  cls: 'youtube', icon: '▶' },
+            { key: 'apple',   label: 'Ouvir no Apple Music',    cls: 'apple',   icon: '▶' },
+        ];
+        const secondaryPlatforms = [
+            { key: 'deezer',  label: 'Deezer',  cls: 'secondary', icon: '▶' },
+            { key: 'amazon',  label: 'Amazon',  cls: 'secondary', icon: '▶' },
+            { key: 'tidal',   label: 'Tidal',   cls: 'secondary', icon: '▶' },
+        ];
+
+        streamingButtons.innerHTML = '';
+        mainPlatforms.forEach(p => {
+            const a = document.createElement('a');
+            a.href = buildStreamingUrl(p.key, query);
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = `stream-btn ${p.cls}`;
+            a.innerHTML = `<span class="icon">${p.icon}</span><span>${p.label}</span>`;
+            a.addEventListener('click', () => trackEvent('click_album_streaming', { platform: p.key, destination_url: a.href }));
+            streamingButtons.appendChild(a);
+        });
+
+        secondaryRow.innerHTML = '';
+        secondaryPlatforms.forEach(p => {
+            const a = document.createElement('a');
+            a.href = buildStreamingUrl(p.key, query);
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = `stream-btn ${p.cls}`;
+            a.innerHTML = `<span class="icon">${p.icon}</span><span>${p.label}</span>`;
+            a.addEventListener('click', () => trackEvent('click_album_streaming', { platform: p.key, destination_url: a.href }));
+            secondaryRow.appendChild(a);
+        });
+    }
+
+    function renderTracklist(tracks, artworkUrl) {
+        tracklist.innerHTML = '';
+        tracks.forEach((track, i) => {
+            const item = document.createElement('div');
+            item.className = 'track-item';
+
+            const duration = track.trackTimeMillis ? formatDuration(track.trackTimeMillis) : '';
+            item.innerHTML = `
+                <span class="track-number">${track.trackNumber || i + 1}</span>
+                <div class="track-info">
+                    <div class="track-name">${track.trackName}</div>
+                    ${duration ? `<div class="track-duration">${duration}</div>` : ''}
+                </div>
+                <span class="track-play-icon">▶</span>
+            `;
+
+            item.addEventListener('click', () => {
+                const url = buildSongPageUrl(track.artistName, track.trackName, artworkUrl);
+                trackEvent('click_track', {
+                    track_name: track.trackName,
+                    track_number: track.trackNumber || i + 1,
+                    destination_url: url
+                });
+                window.location.href = url;
+            });
+
+            tracklist.appendChild(item);
+        });
+    }
+
+    function setupShare() {
+        const shareUrl = window.location.href.startsWith('file:')
+            ? `${canonicalBase}?album=${encodeURIComponent(albumParam)}&artista=${encodeURIComponent(artistParam)}`
+            : window.location.href;
+
+        const shareText = `Ouça "${albumTitle.textContent}" de ${albumArtist.textContent} em todas as plataformas:`;
+
+        if (navigator.share) {
+            shareBtn.addEventListener('click', () => {
+                navigator.share({ title: albumTitle.textContent, text: shareText, url: shareUrl })
+                    .then(() => trackEvent('click_share_album', { link_tipo: 'Compartilhar (Nativo)' }))
+                    .catch(() => {});
+            });
+        } else if (navigator.clipboard) {
+            shareBtn.textContent = 'Copiar Link do Álbum';
+            shareBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    shareBtn.textContent = 'Link Copiado! 👍';
+                    shareBtn.classList.add('copied');
+                    trackEvent('click_share_album', { link_tipo: 'Copiar Link' });
+                    setTimeout(() => {
+                        shareBtn.textContent = 'Copiar Link do Álbum';
+                        shareBtn.classList.remove('copied');
+                    }, 2000);
+                });
+            });
+        } else {
+            shareBtn.style.display = 'none';
+        }
+    }
+
+    async function loadAlbum() {
+        if (!albumParam || !artistParam) {
+            stateError.style.display = 'block';
+            stateError.querySelector('p').textContent = 'Parâmetros ?album= e ?artista= são obrigatórios na URL.';
+            return;
+        }
+
+        stateLoading.style.display = 'block';
+
+        trackEvent('album_page_view', { album: albumParam, artista: artistParam });
+
+        const query = buildAlbumQuery();
+
+        try {
+            // Busca o álbum no iTunes
+            const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=5&country=BR`);
+            if (!res.ok) throw new Error(`iTunes status ${res.status}`);
+            const data = await res.json();
+
+            if (!data.results || data.results.length === 0) {
+                stateLoading.style.display = 'none';
+                stateNotfound.style.display = 'block';
+                document.getElementById('notfound-query').textContent = query;
+                return;
+            }
+
+            // Pega o álbum mais relevante
+            const album = data.results[0];
+            const collectionId = album.collectionId;
+
+            // Busca as faixas do álbum
+            const tracksRes = await fetch(`https://itunes.apple.com/lookup?id=${collectionId}&entity=song&country=BR`);
+            if (!tracksRes.ok) throw new Error(`iTunes lookup status ${tracksRes.status}`);
+            const tracksData = await tracksRes.json();
+
+            // Filtra só as faixas (não o próprio álbum que também vem no resultado)
+            const tracks = tracksData.results
+                .filter(r => r.wrapperType === 'track' && r.kind === 'song')
+                .sort((a, b) => (a.trackNumber || 0) - (b.trackNumber || 0));
+
+            if (tracks.length === 0) {
+                stateLoading.style.display = 'none';
+                stateNotfound.style.display = 'block';
+                document.getElementById('notfound-query').textContent = query;
+                return;
+            }
+
+            const artworkUrl = album.artworkUrl100
+                ? album.artworkUrl100.replace('100x100bb', '300x300bb').replace('100x100', '300x300')
+                : '';
+
+            stateLoading.style.display = 'none';
+
+            renderHeader(album, tracks);
+            renderTracklist(tracks, artworkUrl);
+            setupShare();
+
+            albumHeader.style.display = 'block';
+            tracklistSection.style.display = 'block';
+
+            trackEvent('album_loaded', {
+                album: album.collectionName,
+                artista: album.artistName,
+                track_count: tracks.length
+            });
+
+        } catch (err) {
+            console.error('Erro ao carregar álbum:', err);
+            stateLoading.style.display = 'none';
+            stateError.style.display = 'block';
+        }
+    }
+
+    loadAlbum();
+</script>
+</body>
+</html>
