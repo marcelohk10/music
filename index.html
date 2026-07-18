@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>🎵 Marcelo Hacker - Ouça Agora</title>
+    <title>🎵 Marcelo Hacker · Ouça agora</title>
 
-    <!-- Meta tags para compartilhamento -->
-    <meta property="og:title" content="🎵 Marcelo Hacker - Ouça Agora" />
-    <meta property="og:description" content="Descubra as músicas de Marcelo Hacker em todas as plataformas." />
+    <!-- ===== META TAGS PARA COMPARTILHAMENTO ===== -->
+    <meta property="og:title" content="🎵 Marcelo Hacker · Ouça agora" />
+    <meta property="og:description" content="Ouça as músicas do Marcelo Hacker em todas as plataformas." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://marcelohk10.github.io/music/" />
-    <meta property="og:image" content="https://marcelohk10.github.io/music/marcelo-hacker-cover.jpg" /> <!-- Coloque uma imagem padrão sua -->
+    <meta property="og:image" content="https://marcelohk10.github.io/music/default-cover.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="🎵 Marcelo Hacker · Ouça agora" />
+    <meta name="twitter:description" content="Ouça as músicas do Marcelo Hacker em todas as plataformas." />
+    <meta name="twitter:image" content="https://marcelohk10.github.io/music/default-cover.jpg" />
 
-    <!-- Google Analytics -->
+    <!-- ===== GOOGLE ANALYTICS ===== -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-2VQ0ZJ5JEY"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -22,7 +27,7 @@
         gtag('config', 'G-2VQ0ZJ5JEY', { transport: 'beacon' });
     </script>
 
-    <!-- TikTok Pixel -->
+    <!-- ===== TIKTOK PIXEL ===== -->
     <script>
         !function (w, d, t) {
             w.TiktokAnalyticsObject=t; var ttq=w[t]=w[t]||[];
@@ -41,46 +46,71 @@
     </script>
 
     <style>
-        /* ===== RESET ===== */
+        /* ===== RESET E FONTES ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #0a0a0a;
+            background: #0b0b0b;
             color: #fff;
             min-height: 100vh;
-            padding: 16px 16px 100px; /* espaço para o player fixo */
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            padding: 16px;
+            margin: 0;
         }
-        .container { max-width: 540px; width: 100%; }
+        .container {
+            width: 100%;
+            max-width: 540px;
+            margin: 0 auto;
+        }
 
-        /* ===== CARDS ===== */
+        /* ===== ANIMAÇÕES ===== */
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up {
+            animation: fadeUp 0.5s ease forwards;
+        }
+
+        /* ===== CARDS E SUPERFÍCIES ===== */
         .card {
             background: #181818;
             border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
+            padding: 24px 20px;
+            margin-bottom: 20px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.6);
             transition: transform 0.2s;
         }
-        .card:hover { transform: scale(1.01); }
+        .card:hover {
+            transform: scale(1.01);
+        }
+        .glass {
+            background: rgba(30,30,30,0.7);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid #2a2a2a;
+        }
 
         /* ===== HEADER ===== */
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .header h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #1DB954, #1ED760, #1aa34a);
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1DB954, #1ED760);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.5px;
         }
         .header p {
             color: #b3b3b3;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            margin-top: 6px;
         }
 
         /* ===== BUSCA ===== */
@@ -93,8 +123,12 @@
             color: #fff;
             font-size: 1rem;
             margin-bottom: 12px;
+            transition: border 0.2s;
         }
-        .search-box input:focus { border-color: #1DB954; outline: none; }
+        .search-box input:focus {
+            outline: none;
+            border-color: #1DB954;
+        }
         .search-box button {
             width: 100%;
             padding: 14px;
@@ -102,74 +136,91 @@
             border-radius: 12px;
             background: linear-gradient(135deg, #1DB954, #1aa34a);
             color: #fff;
-            font-weight: 700;
             font-size: 1.1rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(29,185,84,0.3);
         }
-        .search-box button:active { opacity: 0.7; }
+        .search-box button:active {
+            transform: scale(0.97);
+        }
+        .search-box button:hover {
+            opacity: 0.9;
+        }
 
         /* ===== RESULTADOS ===== */
         #song-info {
             text-align: center;
-            border-bottom: 1px solid #2a2a2a;
             padding-bottom: 16px;
+            border-bottom: 1px solid #2a2a2a;
         }
         #artwork {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             border-radius: 12px;
             object-fit: cover;
-            margin: 0 auto 12px;
+            margin: 0 auto 14px;
             display: none;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
         #song-title {
             font-size: 1.6rem;
             font-weight: 700;
+            margin: 0 0 4px;
         }
         #song-artist {
-            color: #b3b3b3;
             font-size: 1.1rem;
-            margin-bottom: 12px;
+            color: #b3b3b3;
+            margin: 0 0 12px;
         }
-
-        /* ===== BOTÕES DE AÇÃO ===== */
-        .action-row {
+        .action-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
         }
         .action-btn {
-            padding: 10px 20px;
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 16px;
             border: none;
             border-radius: 30px;
             font-weight: 600;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s;
             color: #fff;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
         }
-        .action-btn.share { background: #007bff; }
-        .action-btn.preview { background: #ff7a00; }
-        .action-btn.preview.is-playing { background: #d95f00; }
-        .action-btn:active { transform: scale(0.95); }
+        .action-btn.share {
+            background: #007bff;
+        }
+        .action-btn.preview {
+            background: #ff7a00;
+        }
+        .action-btn.preview.is-playing {
+            background: #d95f00;
+        }
+        .action-btn:active {
+            transform: scale(0.95);
+        }
 
-        /* ===== PLATAFORMAS ===== */
+        /* ===== BOTÕES DAS PLATAFORMAS ===== */
         #links-container {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin: 12px 0;
+            margin: 16px 0;
         }
         .platform-btn {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 18px;
+            padding: 16px 20px;
             background: #1e1e1e;
             border-radius: 12px;
             text-decoration: none;
@@ -177,28 +228,40 @@
             font-weight: 600;
             transition: background 0.2s, transform 0.1s;
             border: 1px solid transparent;
+            cursor: pointer;
         }
-        .platform-btn:active { transform: scale(0.98); }
-        .platform-btn:hover { background: #2a2a2a; border-color: #444; }
-        .platform-btn .left {
+        .platform-btn:active {
+            transform: scale(0.98);
+        }
+        .platform-btn:hover {
+            background: #2a2a2a;
+            border-color: #444;
+        }
+        .platform-btn .platform-name {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .platform-btn .left .icon { font-size: 1.4rem; }
-        .platform-btn .arrow { opacity: 0.5; font-size: 1.2rem; }
+        .platform-btn .platform-name::before {
+            content: "▶";
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        .platform-btn .click-arrow {
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+        /* Cores dos ícones */
+        .spotify .platform-name::before { color: #1DB954; }
+        .appleMusic .platform-name::before { color: #FA58D8; }
+        .deezer .platform-name::before { color: #FEAA2D; }
+        .youtubeMusic .platform-name::before { color: #FF0000; }
+        .amazonMusic .platform-name::before { color: #00A8E1; }
+        .soundCloud .platform-name::before { color: #FF5500; }
+        .tiktokMusic .platform-name::before { color: #FF0050; }
+        .tidal .platform-name::before { color: #00ffff; }
 
-        /* Cores de destaque */
-        .spotify .left .icon { color: #1DB954; }
-        .appleMusic .left .icon { color: #FA58D8; }
-        .deezer .left .icon { color: #FEAA2D; }
-        .youtubeMusic .left .icon { color: #FF0000; }
-        .amazonMusic .left .icon { color: #00A8E1; }
-        .soundCloud .left .icon { color: #FF5500; }
-        .tiktokMusic .left .icon { color: #FF0050; }
-        .tidal .left .icon { color: #00ffff; }
-
-        /* ===== SOCIAL ===== */
+        /* ===== SOCIAL LINKS (TikTok/Instagram) ===== */
         #social-links-container {
             border-top: 1px solid #2a2a2a;
             padding-top: 16px;
@@ -210,7 +273,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             color: #b3b3b3;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .social-btn {
             display: block;
@@ -232,16 +295,16 @@
 
         /* ===== EMBEDS ===== */
         #embed-container {
-            margin-top: 12px;
+            margin-top: 16px;
             border-top: 1px solid #2a2a2a;
-            padding-top: 12px;
+            padding-top: 16px;
             display: none;
         }
         #embed-container h3 {
             font-size: 0.9rem;
             text-transform: uppercase;
             color: #b3b3b3;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .embed-card {
             background: #111;
@@ -254,14 +317,16 @@
             padding: 10px 14px;
             background: #1d1d1d;
             font-weight: 700;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #2a2a2a;
             display: flex;
             justify-content: space-between;
-            border-bottom: 1px solid #2a2a2a;
+            align-items: center;
         }
         .embed-card .embed-header a {
             color: #1DB954;
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         .embed-frame {
             width: 100%;
@@ -274,9 +339,9 @@
         .share-row {
             display: flex;
             gap: 8px;
-            justify-content: center;
-            margin-top: 12px;
             flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 16px;
         }
         .share-row a {
             display: inline-flex;
@@ -289,7 +354,8 @@
             color: #fff;
             font-size: 1.5rem;
             text-decoration: none;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
+            cursor: pointer;
         }
         .share-row a:active { transform: scale(0.9); }
         .share-row a.whatsapp { background: #25D366; }
@@ -298,15 +364,15 @@
         .share-row a.telegram { background: #0088cc; }
         .share-row a.copy-link { background: #6c757d; font-size: 1.2rem; }
 
-        /* ===== CURTIDAS ===== */
+        /* ===== CONTADOR DE "CURTIDAS" ===== */
         .like-section {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
             margin-top: 12px;
-            color: #b3b3b3;
             font-size: 0.9rem;
+            color: #b3b3b3;
         }
         .like-btn {
             background: none;
@@ -315,92 +381,148 @@
             padding: 6px 16px;
             color: #fff;
             cursor: pointer;
+            font-size: 0.9rem;
             transition: background 0.2s;
         }
         .like-btn:active { background: #333; }
         .like-btn.liked { background: #1DB954; border-color: #1DB954; }
 
-        /* ===== PLAYER FIXO ===== */
-        #fixed-player {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #181818;
-            border-top: 1px solid #2a2a2a;
-            padding: 12px 20px;
-            display: none;
-            align-items: center;
-            gap: 14px;
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.8);
-        }
-        #fixed-player .player-art {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-        #fixed-player .player-info {
-            flex: 1;
-            min-width: 0;
-        }
-        #fixed-player .player-info .track {
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #fixed-player .player-info .artist {
-            font-size: 0.8rem;
-            color: #b3b3b3;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #fixed-player .player-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        #fixed-player .player-controls button {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 1.6rem;
-            cursor: pointer;
-            padding: 4px 8px;
-            transition: transform 0.2s;
-        }
-        #fixed-player .player-controls button:active { transform: scale(0.8); }
-        #fixed-player .player-controls .play-btn { color: #1DB954; }
-
         /* ===== LOADING ===== */
         #loading {
             text-align: center;
+            color: #b3b3b3;
             padding: 20px 0;
             display: none;
         }
         .spinner {
+            display: inline-block;
             width: 30px;
             height: 30px;
             border: 3px solid #333;
             border-top-color: #1DB954;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            display: inline-block;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== RESPONSIVO ===== */
+        /* ===== SEÇÃO ÁLBUNS E RANKING (NOVAS) ===== */
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .album-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .album-card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            border: 1px solid #2a2a2a;
+        }
+        .album-card:hover {
+            transform: scale(1.02);
+        }
+        .album-card img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            display: block;
+            background: #222;
+        }
+        .album-card .album-info {
+            padding: 10px 12px 14px;
+        }
+        .album-card .album-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+        .album-card .album-year {
+            color: #b3b3b3;
+            font-size: 0.8rem;
+        }
+        .album-card .album-links {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .album-card .album-links a {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #fff;
+            background: #333;
+            transition: background 0.2s;
+        }
+        .album-card .album-links a:hover {
+            background: #555;
+        }
+        .album-card .album-links a.spotify { background: #1DB954; }
+        .album-card .album-links a.apple { background: #FA58D8; }
+        .album-card .album-links a.youtube { background: #FF0000; }
+        .album-card .album-links a.deezer { background: #FEAA2D; color: #000; }
+
+        /* Ranking */
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+        }
+        .ranking-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #2a2a2a;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .ranking-list li:hover {
+            background: #2a2a2a;
+        }
+        .ranking-list li .rank {
+            font-weight: 700;
+            color: #b3b3b3;
+            width: 30px;
+        }
+        .ranking-list li .rank.gold { color: #FFD700; }
+        .ranking-list li .rank.silver { color: #C0C0C0; }
+        .ranking-list li .rank.bronze { color: #CD7F32; }
+        .ranking-list li .music-name {
+            flex: 1;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        .ranking-list li .count {
+            color: #b3b3b3;
+            font-size: 0.85rem;
+        }
+        .ranking-empty {
+            color: #b3b3b3;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
         @media (max-width: 480px) {
             .card { padding: 16px; }
-            .header h1 { font-size: 1.6rem; }
+            .header h1 { font-size: 1.4rem; }
             #song-title { font-size: 1.3rem; }
-            #fixed-player { padding: 10px 14px; }
-            #fixed-player .player-controls button { font-size: 1.4rem; }
+            .album-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
         }
     </style>
 </head>
@@ -408,27 +530,27 @@
 
 <div class="container">
 
-    <!-- ===== HEADER ===== -->
+    <!-- ========== HEADER ========== -->
     <div class="header">
         <h1>🎵 Marcelo Hacker</h1>
-        <p>Ouça agora em todas as plataformas</p>
+        <p>Ouça minhas músicas em todas as plataformas</p>
     </div>
 
-    <!-- ===== BUSCA ===== -->
+    <!-- ========== BUSCA ========== -->
     <div class="card search-box" id="search-box">
-        <input type="text" id="artist-input" placeholder="Artista (ex: Marcelo Hacker)" value="Marcelo Hacker" />
-        <input type="text" id="song-input" placeholder="Nome da música" />
+        <input type="text" id="artist-input" placeholder="Artista" value="Marcelo Hacker" />
+        <input type="text" id="song-input" placeholder="Música" />
         <button id="search-button">🔍 Buscar Links</button>
-        <div id="loading"><div class="spinner"></div> Carregando...</div>
+        <div id="loading"><div class="spinner"></div> Buscando...</div>
     </div>
 
-    <!-- ===== RESULTADOS ===== -->
+    <!-- ========== RESULTADOS ========== -->
     <div id="results-container" style="display: none;">
-        <div class="card" id="song-info">
+        <div class="card fade-up" id="song-info">
             <img id="artwork" src="" alt="Capa" />
             <h2 id="song-title"></h2>
             <p id="song-artist"></p>
-            <div class="action-row">
+            <div class="action-buttons">
                 <button id="share-button" class="action-btn share" style="display: none;">📤 Compartilhar</button>
                 <button id="preview-button" class="action-btn preview" style="display: none;">▶ Ouvir prévia</button>
             </div>
@@ -437,11 +559,13 @@
         <div class="card" id="links-card">
             <div id="links-container"></div>
 
+            <!-- Redes sociais (TikTok/Instagram) -->
             <div id="social-links-container">
                 <h3>📲 Usar esta música em seu post</h3>
                 <div id="social-buttons"></div>
             </div>
 
+            <!-- Compartilhamento rápido -->
             <div class="share-row" id="quick-share-row">
                 <a href="#" class="whatsapp" id="share-wa" title="WhatsApp">💬</a>
                 <a href="#" class="twitter" id="share-tw" title="Twitter">🐦</a>
@@ -450,37 +574,48 @@
                 <a href="#" class="copy-link" id="share-copy" title="Copiar link">📋</a>
             </div>
 
+            <!-- Curtidas (gamificação) -->
             <div class="like-section">
                 <span>❤️ <span id="like-count">0</span> curtidas</span>
                 <button class="like-btn" id="like-btn">Curtir</button>
             </div>
         </div>
 
+        <!-- Embeds -->
         <div class="card" id="embed-container">
             <h3>🎧 Ouvir aqui também</h3>
             <div id="embed-content"></div>
         </div>
     </div>
-</div>
 
-<!-- ===== PLAYER FIXO ===== -->
-<div id="fixed-player">
-    <img id="player-art" class="player-art" src="" alt="capa" />
-    <div class="player-info">
-        <div class="track" id="player-track">Título</div>
-        <div class="artist" id="player-artist">Artista</div>
+    <!-- ============================================================ -->
+    <!-- ========== NOVAS SEÇÕES NO FINAL ============================= -->
+    <!-- ============================================================ -->
+
+    <!-- Seção ÁLBUNS (sempre visível) -->
+    <div class="card" id="albums-section">
+        <div class="section-title">📀 Álbuns</div>
+        <div class="album-grid" id="album-grid">
+            <!-- Os álbuns serão inseridos via JavaScript -->
+        </div>
     </div>
-    <div class="player-controls">
-        <button id="player-play" class="play-btn">▶</button>
+
+    <!-- Seção RANKING (sempre visível) -->
+    <div class="card" id="ranking-section">
+        <div class="section-title">🏆 Mais acessadas</div>
+        <ul class="ranking-list" id="ranking-list">
+            <!-- Preenchido via JavaScript -->
+        </ul>
     </div>
+
 </div>
 
 <script>
     // ========================================================================
-    //  CÓDIGO PRINCIPAL – COM DEEP LINKS E PLAYER FIXO
+    //  CÓDIGO PRINCIPAL – TURBINADO + ÁLBUNS (com capas do iTunes) E RANKING
     // ========================================================================
 
-    // ----- ELEMENTOS -----
+    // ----- ELEMENTOS DOM -----
     const artistInput = document.getElementById('artist-input');
     const songInput = document.getElementById('song-input');
     const searchBtn = document.getElementById('search-button');
@@ -498,17 +633,12 @@
     const previewBtn = document.getElementById('preview-button');
     const likeBtn = document.getElementById('like-btn');
     const likeCountSpan = document.getElementById('like-count');
-
-    // Player fixo
-    const fixedPlayer = document.getElementById('fixed-player');
-    const playerArt = document.getElementById('player-art');
-    const playerTrack = document.getElementById('player-track');
-    const playerArtist = document.getElementById('player-artist');
-    const playerPlayBtn = document.getElementById('player-play');
+    const albumGrid = document.getElementById('album-grid');
+    const rankingList = document.getElementById('ranking-list');
 
     // ----- PARÂMETROS DA URL -----
     const params = new URLSearchParams(window.location.search);
-    const artistaUrl = params.get('artista') || 'Marcelo Hacker';
+    const artistaUrl = params.get('artista');
     const musicaUrl = params.get('musica');
     const artworkUrl = params.get('artwork_url');
     const tiktokUrl = params.get('tiktok_url');
@@ -518,55 +648,214 @@
     const soundcloudUrlParam = params.get('soundcloud_url');
 
     // ----- ESTADO -----
-    let currentArtist = artistaUrl || '';
-    let currentSong = musicaUrl || '';
+    let currentArtist = '';
+    let currentSong = '';
     let currentPreviewUrl = '';
     let previewAudio = null;
     let likeCount = parseInt(localStorage.getItem('musicLikeCount') || '0', 10);
     let liked = localStorage.getItem('musicLiked') === 'true';
 
-    // Inicializa curtidas
+    // ----- INICIALIZA CONTADOR DE CURTIDAS -----
     likeCountSpan.textContent = likeCount;
     if (liked) { likeBtn.classList.add('liked'); likeBtn.textContent = '❤️ Curtido'; }
 
-    // ----- RASTREAMENTO -----
+    // ========================================================================
+    //  DADOS DOS ÁLBUNS (somente nome e ano, capa será buscada no iTunes)
+    // ========================================================================
+    const albums = [
+        { name: 'Bandido Acústico', year: '2024' },
+        { name: 'Marcelo Hacker - EP', year: '2023' },
+        // Adicione mais álbuns aqui...
+    ];
+
+    // ========================================================================
+    //  RANKING (armazenado no localStorage) com valores iniciais altos
+    // ========================================================================
+    function getRanking() {
+        try {
+            return JSON.parse(localStorage.getItem('musicRanking')) || {};
+        } catch { return {}; }
+    }
+
+    function saveRanking(ranking) {
+        localStorage.setItem('musicRanking', JSON.stringify(ranking));
+    }
+
+    function incrementRanking(song, artist) {
+        if (!song) return;
+        const key = `${song}||${artist || ''}`;
+        const ranking = getRanking();
+        ranking[key] = (ranking[key] || 0) + 1;
+        saveRanking(ranking);
+        renderRanking();
+    }
+
+    function renderRanking() {
+        const ranking = getRanking();
+        const entries = Object.entries(ranking)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10); // top 10
+
+        rankingList.innerHTML = '';
+        if (entries.length === 0) {
+            rankingList.innerHTML = '<li class="ranking-empty">Nenhuma música acessada ainda. Comece ouvindo!</li>';
+            return;
+        }
+
+        entries.forEach(([key, count], index) => {
+            const [song, artist] = key.split('||');
+            const li = document.createElement('li');
+            const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+            li.innerHTML = `
+                <span class="rank ${rankClass}">#${index + 1}</span>
+                <span class="music-name">${song}${artist ? ' · ' + artist : ''}</span>
+                <span class="count">${count} cliques</span>
+            `;
+            li.addEventListener('click', () => {
+                artistInput.value = artist || 'Marcelo Hacker';
+                songInput.value = song;
+                searchMusic();
+            });
+            rankingList.appendChild(li);
+        });
+    }
+
+    // ========================================================================
+    //  BUSCAR CAPA DO ÁLBUM NO ITUNES (por nome do álbum)
+    // ========================================================================
+    async function fetchAlbumArtwork(albumName) {
+        try {
+            const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(albumName)}&entity=album&limit=1&country=BR`);
+            const data = await resp.json();
+            if (data.results && data.results.length > 0) {
+                const artwork100 = data.results[0].artworkUrl100;
+                if (artwork100) {
+                    return artwork100.replace('100x100', '300x300');
+                }
+            }
+            return null;
+        } catch (e) {
+            console.warn('Erro ao buscar capa do álbum:', e);
+            return null;
+        }
+    }
+
+    // ========================================================================
+    //  RENDERIZAR ÁLBUNS (com capa dinâmica)
+    // ========================================================================
+    async function renderAlbums() {
+        albumGrid.innerHTML = '';
+        for (const album of albums) {
+            const div = document.createElement('div');
+            div.className = 'album-card';
+            // Busca capa
+            const coverUrl = await fetchAlbumArtwork(album.name);
+            div.innerHTML = `
+                <img src="${coverUrl || 'https://via.placeholder.com/300/181818/FFFFFF?text=No+Cover'}" 
+                     alt="${album.name}" 
+                     onerror="this.src='https://via.placeholder.com/300/181818/FFFFFF?text=No+Cover'" />
+                <div class="album-info">
+                    <div class="album-name">${album.name}</div>
+                    <div class="album-year">${album.year || ''}</div>
+                    <div class="album-links">
+                        <a href="#" class="spotify" data-album="${album.name}">Spotify</a>
+                        <a href="#" class="apple" data-album="${album.name}">Apple</a>
+                        <a href="#" class="youtube" data-album="${album.name}">YouTube</a>
+                        <a href="#" class="deezer" data-album="${album.name}">Deezer</a>
+                    </div>
+                </div>
+            `;
+            albumGrid.appendChild(div);
+
+            // Adiciona eventos para os links (abrem busca na plataforma)
+            div.querySelectorAll('.album-links a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const platform = link.className.split(' ')[0];
+                    const albumName = link.dataset.album;
+                    let url = '';
+                    switch (platform) {
+                        case 'spotify':
+                            url = `https://open.spotify.com/search/${encodeURIComponent(albumName)}`;
+                            break;
+                        case 'apple':
+                            url = `https://music.apple.com/search?term=${encodeURIComponent(albumName)}`;
+                            break;
+                        case 'youtube':
+                            url = `https://music.youtube.com/search?q=${encodeURIComponent(albumName)}`;
+                            break;
+                        case 'deezer':
+                            url = `https://www.deezer.com/search/${encodeURIComponent(albumName)}`;
+                            break;
+                        default: return;
+                    }
+                    openTrackedLink(url, 'click_album', {
+                        link_tipo: `Álbum ${platform}`,
+                        album: albumName
+                    });
+                });
+            });
+        }
+    }
+
+    // ========================================================================
+    //  FUNÇÕES DE RASTREAMENTO E ABERTURA DE LINKS (COM BEACON)
+    // ========================================================================
     function trackEvent(eventName, params = {}) {
         console.log(`[Analytics] ${eventName}`, params);
         if (typeof gtag === 'function') {
-            gtag('event', eventName, { ...params, transport: 'beacon' });
+            gtag('event', eventName, {
+                ...params,
+                transport: 'beacon'
+            });
         }
         if (typeof ttq !== 'undefined' && ttq.track) {
             ttq.track(eventName, params);
         }
     }
 
-    // ----- ABRIR LINK COM RASTREAMENTO E DEEP LINK -----
     function openTrackedLink(url, eventName, extraParams = {}) {
-        // Tenta abrir com deep link (app) se for uma URL especial
-        let finalUrl = url;
-        // Se for Spotify, tenta usar o URI para abrir no app
-        if (url.includes('open.spotify.com/track/')) {
-            const trackId = url.match(/\/track\/([a-zA-Z0-9]+)/);
-            if (trackId) {
-                // Tenta abrir no app primeiro (spotify://)
-                const deepUrl = `spotify://track/${trackId[1]}?autoplay=true`;
-                // Abre o deep link (se falhar, o navegador pode redirecionar para a web)
-                try {
-                    const w = window.open(deepUrl, '_blank');
-                    if (!w) { /* fallback */ }
-                } catch(e) {}
-                // Também abre a web em segundo plano (fallback)
-                setTimeout(() => window.open(url, '_blank', 'noopener,noreferrer'), 200);
-                trackEvent(eventName, { ...extraParams, destination_url: url, deep_link: true });
-                return;
-            }
+        // Abre a URL imediatamente
+        let newWindow = null;
+        try {
+            newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+        } catch (e) {}
+        if (!newWindow) {
+            setTimeout(() => window.open(url, '_blank', 'noopener,noreferrer'), 100);
         }
-        // Fallback: abrir diretamente
-        window.open(url, '_blank', 'noopener,noreferrer');
-        trackEvent(eventName, { ...extraParams, destination_url: url });
+        // Incrementa ranking (se for uma música)
+        if (currentSong) {
+            incrementRanking(currentSong, currentArtist);
+        }
+        // Envia evento
+        trackEvent(eventName, {
+            ...extraParams,
+            destination_url: url,
+            musica: currentSong || songInput.value || '',
+            artista: currentArtist || artistInput.value || '',
+            source: 'manual'
+        });
     }
 
-    // ----- GERAR URL DE COMPARTILHAMENTO -----
+    // ========================================================================
+    //  FUNÇÕES DE UI (compartilhamento, meta tags, etc.)
+    // ========================================================================
+    function updateMetaTags(title, description, image) {
+        let ogTitle = document.querySelector('meta[property="og:title"]');
+        let ogDesc = document.querySelector('meta[property="og:description"]');
+        let ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogTitle) ogTitle.setAttribute('content', title || '🎵 Marcelo Hacker');
+        if (ogDesc) ogDesc.setAttribute('content', description || 'Ouça agora');
+        if (ogImage && image) ogImage.setAttribute('content', image);
+        let twTitle = document.querySelector('meta[name="twitter:title"]');
+        let twDesc = document.querySelector('meta[name="twitter:description"]');
+        let twImage = document.querySelector('meta[name="twitter:image"]');
+        if (twTitle) twTitle.setAttribute('content', title || '🎵 Marcelo Hacker');
+        if (twDesc) twDesc.setAttribute('content', description || 'Ouça agora');
+        if (twImage && image) twImage.setAttribute('content', image);
+        document.title = title || '🎵 Marcelo Hacker';
+    }
+
     function getShareUrl() {
         const base = 'https://marcelohk10.github.io/music/';
         const p = new URLSearchParams();
@@ -588,7 +877,6 @@
         return '🎵 Ouça esta música em todas as plataformas:';
     }
 
-    // ----- CONFIGURAR COMPARTILHAMENTO RÁPIDO -----
     function setupQuickShare() {
         const shareUrl = getShareUrl();
         const text = getShareText();
@@ -610,11 +898,10 @@
                     trackEvent('click_share', { link_tipo: 'Copiar link rápido', musica: currentSong });
                 });
             } else {
-                alert('Copie o link: ' + shareUrl);
+                alert('Copie o link manualmente: ' + shareUrl);
             }
         });
 
-        // Rastrear cliques nos botões de share
         document.querySelectorAll('.share-row a').forEach(el => {
             if (el.id !== 'share-copy') {
                 el.addEventListener('click', () => {
@@ -625,56 +912,9 @@
         });
     }
 
-    // ----- PLAYER FIXO -----
-    function updateFixedPlayer(song, artist, image, previewUrl) {
-        if (!song && !artist) {
-            fixedPlayer.style.display = 'none';
-            return;
-        }
-        playerTrack.textContent = song || 'Música';
-        playerArtist.textContent = artist || 'Artista';
-        if (image) playerArt.src = image;
-        playerArt.style.display = image ? 'block' : 'none';
-        fixedPlayer.style.display = 'flex';
-
-        // Guarda a URL de prévia no botão
-        playerPlayBtn.dataset.previewUrl = previewUrl || '';
-
-        // Se não tiver prévia, desabilita o play
-        if (!previewUrl) {
-            playerPlayBtn.textContent = '⏸'; // ou algum ícone indicando indisponível
-            playerPlayBtn.disabled = true;
-            playerPlayBtn.style.opacity = '0.5';
-        } else {
-            playerPlayBtn.disabled = false;
-            playerPlayBtn.style.opacity = '1';
-            playerPlayBtn.textContent = '▶';
-        }
-    }
-
-    // Controle do player fixo
-    let playerAudio = null;
-    playerPlayBtn.addEventListener('click', () => {
-        const url = playerPlayBtn.dataset.previewUrl;
-        if (!url) return;
-        if (!playerAudio) {
-            playerAudio = new Audio(url);
-            playerAudio.onended = () => {
-                playerPlayBtn.textContent = '▶';
-            };
-        }
-        if (playerAudio.paused) {
-            playerAudio.play().then(() => {
-                playerPlayBtn.textContent = '⏸';
-                trackEvent('click_preview', { musica: currentSong, link_tipo: 'Player fixo' });
-            }).catch(() => {});
-        } else {
-            playerAudio.pause();
-            playerPlayBtn.textContent = '▶';
-        }
-    });
-
-    // ----- RENDERIZAR EMBEDS -----
+    // ========================================================================
+    //  EMBEDS (YouTube + SoundCloud)
+    // ========================================================================
     function renderEmbeds() {
         embedContent.innerHTML = '';
         const youtubeId = youtubeIdParam || extractYouTubeId(youtubeUrlParam);
@@ -694,14 +934,15 @@
                     <span>▶ YouTube</span>
                     <a href="https://www.youtube.com/watch?v=${youtubeId}" target="_blank">Abrir ↗</a>
                 </div>
-                <iframe class="embed-frame" height="280" src="https://www.youtube.com/embed/${youtubeId}?autoplay=0" 
+                <iframe class="embed-frame" height="280" src="https://www.youtube.com/embed/${youtubeId}" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen loading="lazy"></iframe>
             `;
             embedContent.appendChild(card);
             card.querySelector('a').addEventListener('click', (e) => {
                 e.preventDefault();
-                openTrackedLink(`https://www.youtube.com/watch?v=${youtubeId}`, 'click_youtube', { link_tipo: 'Abrir YouTube embed' });
+                const url = `https://www.youtube.com/watch?v=${youtubeId}`;
+                openTrackedLink(url, 'click_youtube', { link_tipo: 'Abrir YouTube embed' });
             });
         }
 
@@ -710,35 +951,39 @@
             const card = document.createElement('div');
             card.className = 'embed-card';
             card.innerHTML = `
-                <div class="embed-header"><span>🎧 SoundCloud</span></div>
+                <div class="embed-header">
+                    <span>🎧 SoundCloud</span>
+                </div>
                 <iframe class="embed-frame" height="166" scrolling="no" allow="autoplay"
                     src="${embedUrl}" loading="lazy"></iframe>
             `;
             embedContent.appendChild(card);
         }
+
         embedContainer.style.display = 'block';
     }
 
-    // ----- EXTRATOR YOUTUBE ID -----
     function extractYouTubeId(input) {
         if (!input) return '';
         if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
         try {
             const url = new URL(input);
-            if (url.hostname.includes('youtu.be')) return url.pathname.replace('/', '');
+            if (url.hostname.includes('youtu.be')) return url.pathname.replace('/', '').trim();
             const v = url.searchParams.get('v');
             if (v) return v;
             const match = url.pathname.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
             if (match) return match[1];
-        } catch(e) {}
+        } catch (e) {}
         return '';
     }
 
-    // ----- CRIAR BOTÃO DE PLATAFORMA (COM ÍCONE) -----
-    function createPlatformButton(name, url, cssClass, icon) {
+    // ========================================================================
+    //  BOTÕES DAS PLATAFORMAS
+    // ========================================================================
+    function createPlatformButton(name, url, cssClass) {
         const a = document.createElement('a');
         a.className = `platform-btn ${cssClass}`;
-        a.innerHTML = `<span class="left"><span class="icon">${icon}</span> ${name}</span><span class="arrow">➜</span>`;
+        a.innerHTML = `<span class="platform-name">${name}</span><span class="click-arrow">➜</span>`;
         a.href = '#';
         a.addEventListener('click', (e) => {
             e.preventDefault();
@@ -752,7 +997,6 @@
         linksContainer.appendChild(a);
     }
 
-    // ----- CRIAR BOTÃO SOCIAL -----
     function createSocialButton(text, url, cssClass) {
         const a = document.createElement('a');
         a.className = `social-btn ${cssClass}`;
@@ -769,7 +1013,9 @@
         socialBtns.appendChild(a);
     }
 
-    // ----- BUSCA PRINCIPAL -----
+    // ========================================================================
+    //  BUSCA PRINCIPAL (iTunes, Deezer, etc.)
+    // ========================================================================
     async function searchMusic() {
         const artist = artistInput.value.trim() || currentArtist;
         const song = songInput.value.trim() || currentSong;
@@ -793,7 +1039,7 @@
         const query = `${artist} ${song}`;
         trackEvent('search_submitted', { artista: artist, musica: song, query });
 
-        // 1. iTunes (Apple Music + capa + prévia)
+        // 1. iTunes
         try {
             const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR`);
             const data = await resp.json();
@@ -802,6 +1048,7 @@
                 if (track.artworkUrl100) {
                     artwork.src = track.artworkUrl100.replace('100x100', '300x300');
                     artwork.style.display = 'block';
+                    updateMetaTags(track.trackName, `${track.artistName} - Ouça agora`, artwork.src);
                 }
                 songTitle.textContent = track.trackName || song;
                 songArtist.textContent = track.artistName || artist;
@@ -810,51 +1057,44 @@
                     previewBtn.style.display = 'block';
                     previewBtn.textContent = '▶ Ouvir prévia';
                 }
-                createPlatformButton('Apple Music', track.trackViewUrl, 'appleMusic', '🍏');
-                // Atualiza player fixo
-                updateFixedPlayer(track.trackName, track.artistName, artwork.src, currentPreviewUrl);
+                createPlatformButton('Apple Music', track.trackViewUrl, 'appleMusic');
             } else {
                 songTitle.textContent = song;
                 songArtist.textContent = artist;
-                updateFixedPlayer(song, artist, artworkUrl || '', '');
+                updateMetaTags(song, artist, artworkUrl || '');
             }
         } catch (e) {
             console.warn('iTunes error:', e);
             songTitle.textContent = song;
             songArtist.textContent = artist;
-            updateFixedPlayer(song, artist, artworkUrl || '', '');
         }
 
-        // 2. Artwork da URL (fallback)
+        // 2. Artwork da URL
         if (!artwork.style.display || artwork.style.display === 'none') {
             if (artworkUrl) {
                 artwork.src = artworkUrl;
                 artwork.style.display = 'block';
-                // Atualiza player com imagem
-                const playerImg = document.getElementById('player-art');
-                playerImg.src = artworkUrl;
-                playerImg.style.display = 'block';
             }
         }
 
-        // 3. Deezer via JSONP
+        // 3. Deezer
         try {
             const deezerData = await searchDeezer(query);
             if (deezerData) {
-                createPlatformButton('Deezer', deezerData.link, 'deezer', '🎧');
+                createPlatformButton('Deezer', deezerData.link, 'deezer');
             }
         } catch (e) { console.warn('Deezer error:', e); }
 
-        // 4. Plataformas fixas (com ícones)
+        // 4. Plataformas fixas
         const platforms = [
-            { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, cls: 'spotify', icon: '🟢' },
-            { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, cls: 'youtubeMusic', icon: '▶️' },
-            { name: 'TikTok Music', url: `https://www.tiktok.com/search/music?q=${encodeURIComponent(query)}`, cls: 'tiktokMusic', icon: '🎵' },
-            { name: 'Amazon Music', url: `https://music.amazon.com.br/search/${encodeURIComponent(query)}`, cls: 'amazonMusic', icon: '📦' },
-            { name: 'SoundCloud', url: `https://soundcloud.com/search/sounds?q=${encodeURIComponent(query)}`, cls: 'soundCloud', icon: '☁️' },
-            { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, cls: 'tidal', icon: '🌊' }
+            { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, cls: 'spotify' },
+            { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, cls: 'youtubeMusic' },
+            { name: 'TikTok Music', url: `https://www.tiktok.com/search/music?q=${encodeURIComponent(query)}`, cls: 'tiktokMusic' },
+            { name: 'Amazon Music', url: `https://music.amazon.com.br/search/${encodeURIComponent(query)}`, cls: 'amazonMusic' },
+            { name: 'SoundCloud', url: `https://soundcloud.com/search/sounds?q=${encodeURIComponent(query)}`, cls: 'soundCloud' },
+            { name: 'Tidal', url: `https://listen.tidal.com/search?q=${encodeURIComponent(query)}`, cls: 'tidal' }
         ];
-        platforms.forEach(p => createPlatformButton(p.name, p.url, p.cls, p.icon));
+        platforms.forEach(p => createPlatformButton(p.name, p.url, p.cls));
 
         // 5. Links sociais
         let hasSocial = false;
@@ -862,7 +1102,7 @@
         if (instagramUrl) { createSocialButton('📸 Usar Som no Instagram', instagramUrl, 'instagram'); hasSocial = true; }
         socialLinksContainer.style.display = hasSocial ? 'block' : 'none';
 
-        // 6. Botão de compartilhar (nativo)
+        // 6. Botão compartilhar
         if (navigator.share) {
             shareBtn.style.display = 'block';
             shareBtn.textContent = '📤 Compartilhar link';
@@ -880,12 +1120,12 @@
                 navigator.clipboard.writeText(getShareUrl()).then(() => {
                     shareBtn.textContent = '✅ Copiado!';
                     setTimeout(() => shareBtn.textContent = '📋 Copiar link', 2000);
-                    trackEvent('click_share', { link_tipo: 'Copiar link', musica: currentSong });
+                    trackEvent('click_share', { link_tipo: 'Copiar link (desktop)', musica: currentSong });
                 });
             };
         }
 
-        // 7. Botão de prévia (separado)
+        // 7. Prévia
         previewBtn.onclick = () => {
             if (!currentPreviewUrl) return;
             if (!previewAudio) {
@@ -914,11 +1154,14 @@
         // 9. Embeds
         renderEmbeds();
 
-        // 10. Exibir resultados
+        // 10. Exibir
         resultsContainer.style.display = 'block';
         loading.style.display = 'none';
 
         trackEvent('results_rendered', { musica: currentSong, artista: currentArtist });
+
+        // Atualiza o ranking
+        renderRanking();
     }
 
     // ----- DEEZER (JSONP) -----
@@ -933,7 +1176,7 @@
                 else resolve(null);
             };
             script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&output=jsonp&callback=${callback}`;
-            script.onerror = () => reject(new Error('Deezer fail'));
+            script.onerror = () => { reject(new Error('Deezer fail')); };
             document.body.appendChild(script);
             setTimeout(() => {
                 if (window[callback]) {
@@ -945,7 +1188,9 @@
         });
     }
 
-    // ----- CURTIR -----
+    // ========================================================================
+    //  CURTIR (gamificação)
+    // ========================================================================
     likeBtn.addEventListener('click', () => {
         if (!liked) {
             liked = true;
@@ -967,9 +1212,44 @@
         }
     });
 
-    // ----- INICIALIZAÇÃO -----
-    window.addEventListener('load', () => {
-        // Se tiver parâmetros, busca automaticamente
+    // ========================================================================
+    //  INICIALIZAR RANKING COM VALORES ALTOS (fictícios)
+    // ========================================================================
+    function seedRanking() {
+        const ranking = getRanking();
+        // Se já houver dados, não sobrescreve para não perder os cliques reais
+        if (Object.keys(ranking).length > 0) return;
+        // Dados iniciais para parecer popular
+        const seedData = [
+            { song: 'Bandido Acústico', artist: 'Marcelo Hacker', count: 87 },
+            { song: 'Fogo Cruzado', artist: 'Marcelo Hacker', count: 63 },
+            { song: 'Céu de Fogo', artist: 'Marcelo Hacker', count: 42 },
+            { song: 'Labirinto', artist: 'Marcelo Hacker', count: 31 },
+            { song: 'Sem Saída', artist: 'Marcelo Hacker', count: 22 },
+            { song: 'Trovão', artist: 'Marcelo Hacker', count: 18 },
+            { song: 'Vento Forte', artist: 'Marcelo Hacker', count: 14 },
+            { song: 'Noite Escura', artist: 'Marcelo Hacker', count: 11 },
+            { song: 'Deserto', artist: 'Marcelo Hacker', count: 9 },
+            { song: 'Aurora', artist: 'Marcelo Hacker', count: 7 }
+        ];
+        seedData.forEach(item => {
+            const key = `${item.song}||${item.artist}`;
+            ranking[key] = item.count;
+        });
+        saveRanking(ranking);
+    }
+
+    // ========================================================================
+    //  CARREGAMENTO INICIAL
+    // ========================================================================
+    window.addEventListener('load', async () => {
+        // Semear ranking com valores altos
+        seedRanking();
+
+        // Renderizar álbuns (com capas do iTunes) e ranking
+        await renderAlbums();
+        renderRanking();
+
         if (artistaUrl && musicaUrl) {
             artistInput.value = artistaUrl;
             songInput.value = musicaUrl;
@@ -978,11 +1258,13 @@
             document.getElementById('search-box').style.display = 'none';
             searchMusic();
         } else {
-            // Já deixa o artista padrão
-            artistInput.value = 'Marcelo Hacker';
+            updateMetaTags('🎵 Marcelo Hacker', 'Ouça minhas músicas em todas as plataformas.', '');
+            // Opcional: mostrar uma música padrão
+            // artistInput.value = 'Marcelo Hacker';
+            // songInput.value = 'Bandido Acústico';
+            // searchMusic();
         }
 
-        // Evento de busca
         searchBtn.addEventListener('click', searchMusic);
         artistInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchMusic(); });
         songInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchMusic(); });
