@@ -45,6 +45,23 @@
         }(window, document, 'ttq');
     </script>
 
+    <!-- ===== FACEBOOK PIXEL (META) ===== -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1019885850910533'); // ← seu Dataset ID
+        fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=1019885850910533&ev=PageView&noscript=1"
+    /></noscript>
+
     <style>
         /* ===== RESET E FONTES ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -405,7 +422,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== SEÇÃO ÁLBUNS E RANKING (NOVAS) ===== */
+        /* ===== SEÇÃO ÁLBUNS E RANKING ===== */
         .section-title {
             font-size: 1.3rem;
             font-weight: 700;
@@ -474,7 +491,6 @@
         .album-card .album-links a.youtube { background: #FF0000; }
         .album-card .album-links a.deezer { background: #FEAA2D; color: #000; }
 
-        /* Ranking */
         .ranking-list {
             list-style: none;
             padding: 0;
@@ -589,30 +605,26 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- ========== NOVAS SEÇÕES NO FINAL ============================= -->
+    <!-- ========== SEÇÕES FINAIS: ÁLBUNS E RANKING =================== -->
     <!-- ============================================================ -->
 
-    <!-- Seção ÁLBUNS (sempre visível) -->
     <div class="card" id="albums-section">
         <div class="section-title">📀 Álbuns</div>
         <div class="album-grid" id="album-grid">
-            <!-- Os álbuns serão inseridos via JavaScript -->
+            <!-- Preenchido via JavaScript com capas do iTunes -->
         </div>
     </div>
 
-    <!-- Seção RANKING (sempre visível) -->
     <div class="card" id="ranking-section">
         <div class="section-title">🏆 Mais acessadas</div>
-        <ul class="ranking-list" id="ranking-list">
-            <!-- Preenchido via JavaScript -->
-        </ul>
+        <ul class="ranking-list" id="ranking-list"></ul>
     </div>
 
 </div>
 
 <script>
     // ========================================================================
-    //  CÓDIGO PRINCIPAL – TURBINADO + ÁLBUNS (com capas do iTunes) E RANKING
+    //  CÓDIGO PRINCIPAL – COM FACEBOOK PIXEL, RANKING INICIAL ALTO E CAPAS DO ITUNES
     // ========================================================================
 
     // ----- ELEMENTOS DOM -----
@@ -660,16 +672,7 @@
     if (liked) { likeBtn.classList.add('liked'); likeBtn.textContent = '❤️ Curtido'; }
 
     // ========================================================================
-    //  DADOS DOS ÁLBUNS (somente nome e ano, capa será buscada no iTunes)
-    // ========================================================================
-    const albums = [
-        { name: 'Bandido Acústico', year: '2024' },
-        { name: 'Marcelo Hacker - EP', year: '2023' },
-        // Adicione mais álbuns aqui...
-    ];
-
-    // ========================================================================
-    //  RANKING (armazenado no localStorage) com valores iniciais altos
+    //  RANKING COM VALORES INICIAIS ALTOS (para não ficar tosco)
     // ========================================================================
     function getRanking() {
         try {
@@ -679,6 +682,21 @@
 
     function saveRanking(ranking) {
         localStorage.setItem('musicRanking', JSON.stringify(ranking));
+    }
+
+    // Se o ranking estiver vazio, popula com valores iniciais altos
+    function initRankingWithFakeData() {
+        const ranking = getRanking();
+        if (Object.keys(ranking).length === 0) {
+            const fake = {
+                'Bandido Acústico||Marcelo Hacker': 1580,
+                'Fé||Marcelo Hacker': 1120,
+                'Rei da Guerra||Marcelo Hacker': 890,
+                'Vida Loka||Marcelo Hacker': 670,
+                'Poesia Acústica||Marcelo Hacker': 540
+            };
+            saveRanking(fake);
+        }
     }
 
     function incrementRanking(song, artist) {
@@ -694,7 +712,7 @@
         const ranking = getRanking();
         const entries = Object.entries(ranking)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 10); // top 10
+            .slice(0, 10);
 
         rankingList.innerHTML = '';
         if (entries.length === 0) {
@@ -721,39 +739,49 @@
     }
 
     // ========================================================================
-    //  BUSCAR CAPA DO ÁLBUM NO ITUNES (por nome do álbum)
+    //  ÁLBUNS – COM CAPA BUSCADA NO ITUNES
     // ========================================================================
-    async function fetchAlbumArtwork(albumName) {
+    // Lista dos seus álbuns (adicione todos que quiser)
+    const albumsData = [
+        { name: 'Bandido Acústico', year: '2024', artist: 'Marcelo Hacker' },
+        { name: 'Marcelo Hacker - EP', year: '2023', artist: 'Marcelo Hacker' },
+        { name: 'Poesia Acústica', year: '2022', artist: 'Marcelo Hacker' },
+        // Adicione mais álbuns aqui
+    ];
+
+    // Busca a capa do álbum no iTunes
+    async function fetchAlbumArt(albumName, artistName) {
+        const query = `${albumName} ${artistName}`;
         try {
-            const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(albumName)}&entity=album&limit=1&country=BR`);
+            const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=1&country=BR`);
             const data = await resp.json();
             if (data.results && data.results.length > 0) {
-                const artwork100 = data.results[0].artworkUrl100;
-                if (artwork100) {
-                    return artwork100.replace('100x100', '300x300');
-                }
+                const album = data.results[0];
+                return album.artworkUrl100 ? album.artworkUrl100.replace('100x100', '600x600') : null;
             }
-            return null;
-        } catch (e) {
-            console.warn('Erro ao buscar capa do álbum:', e);
-            return null;
-        }
+        } catch (e) { console.warn('Erro ao buscar capa do álbum:', e); }
+        return null;
     }
 
-    // ========================================================================
-    //  RENDERIZAR ÁLBUNS (com capa dinâmica)
-    // ========================================================================
+    // Renderiza os álbuns (com capas dinâmicas)
     async function renderAlbums() {
+        albumGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#b3b3b3;">Carregando capas...</div>';
+
+        const albumPromises = albumsData.map(async (album) => {
+            const cover = await fetchAlbumArt(album.name, album.artist);
+            return { ...album, cover };
+        });
+
+        const albumsWithCovers = await Promise.all(albumPromises);
+
         albumGrid.innerHTML = '';
-        for (const album of albums) {
+        albumsWithCovers.forEach(album => {
             const div = document.createElement('div');
             div.className = 'album-card';
-            // Busca capa
-            const coverUrl = await fetchAlbumArtwork(album.name);
+            const coverSrc = album.cover || 'https://via.placeholder.com/600/181818/FFFFFF?text=No+Cover';
             div.innerHTML = `
-                <img src="${coverUrl || 'https://via.placeholder.com/300/181818/FFFFFF?text=No+Cover'}" 
-                     alt="${album.name}" 
-                     onerror="this.src='https://via.placeholder.com/300/181818/FFFFFF?text=No+Cover'" />
+                <img src="${coverSrc}" alt="${album.name}" 
+                     onerror="this.src='https://via.placeholder.com/600/181818/FFFFFF?text=No+Cover'" />
                 <div class="album-info">
                     <div class="album-name">${album.name}</div>
                     <div class="album-year">${album.year || ''}</div>
@@ -765,52 +793,43 @@
                     </div>
                 </div>
             `;
-            albumGrid.appendChild(div);
-
-            // Adiciona eventos para os links (abrem busca na plataforma)
+            // Adiciona eventos para os links (buscam a música no lugar do álbum)
             div.querySelectorAll('.album-links a').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const platform = link.className.split(' ')[0];
                     const albumName = link.dataset.album;
-                    let url = '';
-                    switch (platform) {
-                        case 'spotify':
-                            url = `https://open.spotify.com/search/${encodeURIComponent(albumName)}`;
-                            break;
-                        case 'apple':
-                            url = `https://music.apple.com/search?term=${encodeURIComponent(albumName)}`;
-                            break;
-                        case 'youtube':
-                            url = `https://music.youtube.com/search?q=${encodeURIComponent(albumName)}`;
-                            break;
-                        case 'deezer':
-                            url = `https://www.deezer.com/search/${encodeURIComponent(albumName)}`;
-                            break;
-                        default: return;
-                    }
-                    openTrackedLink(url, 'click_album', {
-                        link_tipo: `Álbum ${platform}`,
-                        album: albumName
-                    });
+                    // Abre a busca com o nome do álbum + artista
+                    artistInput.value = 'Marcelo Hacker';
+                    songInput.value = albumName;
+                    searchMusic();
                 });
             });
-        }
+            albumGrid.appendChild(div);
+        });
     }
 
     // ========================================================================
-    //  FUNÇÕES DE RASTREAMENTO E ABERTURA DE LINKS (COM BEACON)
+    //  FUNÇÕES DE RASTREAMENTO (com Google, TikTok e Facebook)
     // ========================================================================
     function trackEvent(eventName, params = {}) {
         console.log(`[Analytics] ${eventName}`, params);
+
+        // Google Analytics
         if (typeof gtag === 'function') {
             gtag('event', eventName, {
                 ...params,
                 transport: 'beacon'
             });
         }
+
+        // TikTok Pixel
         if (typeof ttq !== 'undefined' && ttq.track) {
             ttq.track(eventName, params);
+        }
+
+        // Facebook Pixel (Meta)
+        if (typeof fbq === 'function') {
+            fbq('trackCustom', eventName, params);
         }
     }
 
@@ -823,11 +842,13 @@
         if (!newWindow) {
             setTimeout(() => window.open(url, '_blank', 'noopener,noreferrer'), 100);
         }
+
         // Incrementa ranking (se for uma música)
         if (currentSong) {
             incrementRanking(currentSong, currentArtist);
         }
-        // Envia evento
+
+        // Envia evento para todos os pixels
         trackEvent(eventName, {
             ...extraParams,
             destination_url: url,
@@ -978,7 +999,7 @@
     }
 
     // ========================================================================
-    //  BOTÕES DAS PLATAFORMAS
+    //  BOTÕES DAS PLATAFORMAS E SOCIAIS
     // ========================================================================
     function createPlatformButton(name, url, cssClass) {
         const a = document.createElement('a');
@@ -1213,43 +1234,19 @@
     });
 
     // ========================================================================
-    //  INICIALIZAR RANKING COM VALORES ALTOS (fictícios)
-    // ========================================================================
-    function seedRanking() {
-        const ranking = getRanking();
-        // Se já houver dados, não sobrescreve para não perder os cliques reais
-        if (Object.keys(ranking).length > 0) return;
-        // Dados iniciais para parecer popular
-        const seedData = [
-            { song: 'Bandido Acústico', artist: 'Marcelo Hacker', count: 87 },
-            { song: 'Fogo Cruzado', artist: 'Marcelo Hacker', count: 63 },
-            { song: 'Céu de Fogo', artist: 'Marcelo Hacker', count: 42 },
-            { song: 'Labirinto', artist: 'Marcelo Hacker', count: 31 },
-            { song: 'Sem Saída', artist: 'Marcelo Hacker', count: 22 },
-            { song: 'Trovão', artist: 'Marcelo Hacker', count: 18 },
-            { song: 'Vento Forte', artist: 'Marcelo Hacker', count: 14 },
-            { song: 'Noite Escura', artist: 'Marcelo Hacker', count: 11 },
-            { song: 'Deserto', artist: 'Marcelo Hacker', count: 9 },
-            { song: 'Aurora', artist: 'Marcelo Hacker', count: 7 }
-        ];
-        seedData.forEach(item => {
-            const key = `${item.song}||${item.artist}`;
-            ranking[key] = item.count;
-        });
-        saveRanking(ranking);
-    }
-
-    // ========================================================================
     //  CARREGAMENTO INICIAL
     // ========================================================================
     window.addEventListener('load', async () => {
-        // Semear ranking com valores altos
-        seedRanking();
+        // Inicializa ranking com dados falsos (se vazio)
+        initRankingWithFakeData();
 
-        // Renderizar álbuns (com capas do iTunes) e ranking
+        // Renderiza álbuns (com capas do iTunes)
         await renderAlbums();
+
+        // Renderiza ranking
         renderRanking();
 
+        // Se houver parâmetros na URL, carrega direto
         if (artistaUrl && musicaUrl) {
             artistInput.value = artistaUrl;
             songInput.value = musicaUrl;
@@ -1259,12 +1256,13 @@
             searchMusic();
         } else {
             updateMetaTags('🎵 Marcelo Hacker', 'Ouça minhas músicas em todas as plataformas.', '');
-            // Opcional: mostrar uma música padrão
+            // Opcional: carregar uma música padrão
             // artistInput.value = 'Marcelo Hacker';
             // songInput.value = 'Bandido Acústico';
             // searchMusic();
         }
 
+        // Event listeners da busca
         searchBtn.addEventListener('click', searchMusic);
         artistInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchMusic(); });
         songInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchMusic(); });
