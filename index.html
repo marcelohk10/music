@@ -415,7 +415,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== ÁLBUNS E RANKING ===== */
+        /* ===== SEÇÃO ÁLBUNS (sem ranking) ===== */
         .section-title {
             font-size: 1.3rem;
             font-weight: 700;
@@ -484,45 +484,6 @@
         .album-card .album-links a.youtube { background: #FF0000; }
         .album-card .album-links a.deezer { background: #FEAA2D; color: #000; }
 
-        .ranking-list {
-            list-style: none;
-            padding: 0;
-        }
-        .ranking-list li {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid #2a2a2a;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .ranking-list li:hover {
-            background: #2a2a2a;
-        }
-        .ranking-list li .rank {
-            font-weight: 700;
-            color: #b3b3b3;
-            width: 30px;
-        }
-        .ranking-list li .rank.gold { color: #FFD700; }
-        .ranking-list li .rank.silver { color: #C0C0C0; }
-        .ranking-list li .rank.bronze { color: #CD7F32; }
-        .ranking-list li .music-name {
-            flex: 1;
-            margin-left: 10px;
-            font-weight: 500;
-        }
-        .ranking-list li .count {
-            color: #b3b3b3;
-            font-size: 0.85rem;
-        }
-        .ranking-empty {
-            color: #b3b3b3;
-            text-align: center;
-            padding: 20px 0;
-        }
-
         @media (max-width: 480px) {
             .card { padding: 16px; }
             .header h1 { font-size: 1.4rem; }
@@ -589,24 +550,19 @@
         </div>
     </div>
 
-    <!-- ========== SEÇÕES FINAIS ========== -->
+    <!-- ========== SEÇÃO ÁLBUNS (FIXA, SEM RANKING) ========== -->
     <div class="card" id="albums-section">
         <div class="section-title">📀 Álbuns</div>
         <div class="album-grid" id="album-grid">
-            <!-- Preenchido via JavaScript -->
+            <!-- Preenchido via JavaScript com dados fixos -->
         </div>
-    </div>
-
-    <div class="card" id="ranking-section">
-        <div class="section-title">🏆 Mais acessadas</div>
-        <ul class="ranking-list" id="ranking-list"></ul>
     </div>
 
 </div>
 
 <script>
     // ========================================================================
-    //  CÓDIGO PRINCIPAL – CORRIGIDO
+    //  CÓDIGO PRINCIPAL – SEM RANKING, ÁLBUNS FIXOS
     // ========================================================================
 
     // ----- ELEMENTOS DOM -----
@@ -628,7 +584,6 @@
     const likeBtn = document.getElementById('like-btn');
     const likeCountSpan = document.getElementById('like-count');
     const albumGrid = document.getElementById('album-grid');
-    const rankingList = document.getElementById('ranking-list');
 
     // ----- PARÂMETROS DA URL -----
     const params = new URLSearchParams(window.location.search);
@@ -653,131 +608,45 @@
     if (liked) { likeBtn.classList.add('liked'); likeBtn.textContent = '❤️ Curtido'; }
 
     // ========================================================================
-    //  RANKING – CORRIGIDO (sem [object Object])
+    //  ÁLBUNS FIXOS DO MARCELO HACKER (PREENCHE AQUI)
     // ========================================================================
-    function getRanking() {
-        try {
-            const data = localStorage.getItem('musicRanking');
-            if (!data) return {};
-            const parsed = JSON.parse(data);
-            if (typeof parsed === 'object' && parsed !== null) {
-                return parsed;
-            }
-            return {};
-        } catch (e) {
-            console.warn('Erro ao ler ranking:', e);
-            return {};
-        }
-    }
-
-    function saveRanking(ranking) {
-        try {
-            localStorage.setItem('musicRanking', JSON.stringify(ranking));
-        } catch (e) { /* ignora */ }
-    }
-
-    // Inicializa com dados falsos (nomes reais)
-    function initRankingWithFakeData() {
-        const ranking = getRanking();
-        if (Object.keys(ranking).length === 0) {
-            const fake = {
-                'Bandido Acústico||Marcelo Hacker': 1580,
-                'Fé||Marcelo Hacker': 1120,
-                'Rei da Guerra||Marcelo Hacker': 890,
-                'Vida Loka||Marcelo Hacker': 670,
-                'O Som da Favela||Marcelo Hacker': 420,
-                'A Noite Inteira||Marcelo Hacker': 310,
-                'Coração na Mão||Marcelo Hacker': 230,
-                'Maluca||Marcelo Hacker': 180,
-                'Fim de Tarde||Marcelo Hacker': 120
-            };
-            saveRanking(fake);
-        }
-    }
-
-    function incrementRanking(song, artist) {
-        if (!song) return;
-        const key = `${song}||${artist || ''}`;
-        const ranking = getRanking();
-        ranking[key] = (ranking[key] || 0) + 1;
-        saveRanking(ranking);
-        renderRanking();
-    }
-
-    function renderRanking() {
-        const ranking = getRanking();
-        const entries = Object.entries(ranking)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10);
-
-        rankingList.innerHTML = '';
-        if (entries.length === 0) {
-            rankingList.innerHTML = '<li class="ranking-empty">Nenhuma música acessada ainda.</li>';
-            return;
-        }
-
-        entries.forEach(([key, count], index) => {
-            // Divide a chave no formato "nome||artista"
-            const parts = key.split('||');
-            const songName = parts[0] || 'Música';
-            const artistName = parts[1] || '';
-
-            const li = document.createElement('li');
-            const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
-            li.innerHTML = `
-                <span class="rank ${rankClass}">#${index + 1}</span>
-                <span class="music-name">${songName}${artistName ? ' · ' + artistName : ''}</span>
-                <span class="count">${count} cliques</span>
-            `;
-            li.addEventListener('click', () => {
-                artistInput.value = artistName || 'Marcelo Hacker';
-                songInput.value = songName;
-                searchMusic();
-            });
-            rankingList.appendChild(li);
-        });
-    }
-
-    // ========================================================================
-    //  ÁLBUNS – AGORA VOCÊ MESMO PREENCHE (vazio por padrão)
-    // ========================================================================
-    // 🔽 COLOQUE AQUI OS SEUS ÁLBUNS (exemplo abaixo, remova ou edite)
     const albumsData = [
-        // Exemplo:
-        // { name: 'Bandido Acústico', year: '2024', artist: 'Marcelo Hacker' },
-        // { name: 'Marcelo Hacker - EP', year: '2023', artist: 'Marcelo Hacker' }
+        {
+            name: 'Bandido Acústico',
+            year: '2024',
+            cover: 'https://marcelohk10.github.io/music/covers/bandido-acustico.jpg', // ← substitua pela URL real
+            links: {
+                spotify: 'https://open.spotify.com/album/...',  // ← coloque o link real
+                apple: 'https://music.apple.com/...',
+                youtube: 'https://music.youtube.com/...',
+                deezer: 'https://www.deezer.com/...'
+            }
+        },
+        {
+            name: 'Marcelo Hacker - EP',
+            year: '2023',
+            cover: 'https://marcelohk10.github.io/music/covers/ep.jpg',
+            links: {
+                spotify: 'https://open.spotify.com/album/...',
+                apple: 'https://music.apple.com/...',
+                youtube: 'https://music.youtube.com/...',
+                deezer: 'https://www.deezer.com/...'
+            }
+        }
+        // Adicione mais álbuns aqui seguindo o mesmo formato
     ];
 
-    async function fetchAlbumArt(albumName, artistName) {
-        const query = `${albumName} ${artistName}`;
-        try {
-            const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=1&country=BR`);
-            const data = await resp.json();
-            if (data.results && data.results.length > 0) {
-                const album = data.results[0];
-                return album.artworkUrl100 ? album.artworkUrl100.replace('100x100', '600x600') : null;
-            }
-        } catch (e) { /* silencioso */ }
-        return null;
-    }
-
-    async function renderAlbums() {
+    // ========================================================================
+    //  RENDERIZAR ÁLBUNS (SEM BUSCA NO ITUNES)
+    // ========================================================================
+    function renderAlbums() {
         if (albumsData.length === 0) {
-            albumGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#b3b3b3;padding:20px 0;">Nenhum álbum cadastrado ainda.</div>';
+            albumGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#b3b3b3;padding:20px 0;">Nenhum álbum cadastrado.</div>';
             return;
         }
 
-        albumGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#b3b3b3;">Carregando capas...</div>';
-
-        const albumPromises = albumsData.map(async (album) => {
-            const cover = await fetchAlbumArt(album.name, album.artist);
-            return { ...album, cover };
-        });
-
-        const albumsWithCovers = await Promise.all(albumPromises);
-
         albumGrid.innerHTML = '';
-        albumsWithCovers.forEach(album => {
+        albumsData.forEach(album => {
             const div = document.createElement('div');
             div.className = 'album-card';
             const coverSrc = album.cover || 'https://via.placeholder.com/600/181818/FFFFFF?text=No+Cover';
@@ -788,22 +657,13 @@
                     <div class="album-name">${album.name}</div>
                     <div class="album-year">${album.year || ''}</div>
                     <div class="album-links">
-                        <a href="#" class="spotify" data-album="${album.name}">Spotify</a>
-                        <a href="#" class="apple" data-album="${album.name}">Apple</a>
-                        <a href="#" class="youtube" data-album="${album.name}">YouTube</a>
-                        <a href="#" class="deezer" data-album="${album.name}">Deezer</a>
+                        ${album.links.spotify ? `<a href="${album.links.spotify}" target="_blank" class="spotify">Spotify</a>` : ''}
+                        ${album.links.apple ? `<a href="${album.links.apple}" target="_blank" class="apple">Apple</a>` : ''}
+                        ${album.links.youtube ? `<a href="${album.links.youtube}" target="_blank" class="youtube">YouTube</a>` : ''}
+                        ${album.links.deezer ? `<a href="${album.links.deezer}" target="_blank" class="deezer">Deezer</a>` : ''}
                     </div>
                 </div>
             `;
-            div.querySelectorAll('.album-links a').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const albumName = link.dataset.album;
-                    artistInput.value = 'Marcelo Hacker';
-                    songInput.value = albumName;
-                    searchMusic();
-                });
-            });
             albumGrid.appendChild(div);
         });
     }
@@ -830,9 +690,6 @@
         } catch (e) {}
         if (!newWindow) {
             setTimeout(() => window.open(url, '_blank', 'noopener,noreferrer'), 100);
-        }
-        if (currentSong) {
-            incrementRanking(currentSong, currentArtist);
         }
         trackEvent(eventName, {
             ...extraParams,
@@ -1156,7 +1013,6 @@
         resultsContainer.style.display = 'block';
         loading.style.display = 'none';
         trackEvent('results_rendered', { musica: currentSong, artista: currentArtist });
-        renderRanking();
     }
 
     // ----- DEEZER (JSONP) -----
@@ -1210,12 +1066,9 @@
     // ========================================================================
     //  CARREGAMENTO INICIAL
     // ========================================================================
-    window.addEventListener('load', async () => {
-        // Inicializa ranking com dados falsos se vazio
-        initRankingWithFakeData();
-
-        await renderAlbums();
-        renderRanking();
+    window.addEventListener('load', () => {
+        // Renderiza álbuns fixos
+        renderAlbums();
 
         if (artistaUrl && musicaUrl) {
             artistInput.value = artistaUrl;
