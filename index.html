@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>🎵 Marcelo Hacker · Ouça agora</title>
 
-    <!-- ===== META TAGS PARA COMPARTILHAMENTO ===== -->
+    <!-- ===== META TAGS ===== -->
     <meta property="og:title" content="🎵 Marcelo Hacker · Ouça agora" />
     <meta property="og:description" content="Ouça as músicas do Marcelo Hacker em todas as plataformas." />
     <meta property="og:type" content="website" />
@@ -55,7 +55,7 @@
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '1019885850910533'); // ← seu Dataset ID
+        fbq('init', '1019885850910533');
         fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none"
@@ -624,7 +624,7 @@
 
 <script>
     // ========================================================================
-    //  CÓDIGO PRINCIPAL – COM FACEBOOK PIXEL, RANKING INICIAL ALTO E CAPAS DO ITUNES
+    //  CÓDIGO PRINCIPAL – COM RANKING CORRIGIDO E CAPAS DINÂMICAS
     // ========================================================================
 
     // ----- ELEMENTOS DOM -----
@@ -672,19 +672,33 @@
     if (liked) { likeBtn.classList.add('liked'); likeBtn.textContent = '❤️ Curtido'; }
 
     // ========================================================================
-    //  RANKING COM VALORES INICIAIS ALTOS (para não ficar tosco)
+    //  RANKING COM VALORES INICIAIS ALTOS – CORRIGIDO
     // ========================================================================
     function getRanking() {
         try {
-            return JSON.parse(localStorage.getItem('musicRanking')) || {};
-        } catch { return {}; }
+            const data = localStorage.getItem('musicRanking');
+            if (!data) return {};
+            const parsed = JSON.parse(data);
+            // Garantir que é um objeto com chaves string
+            if (typeof parsed === 'object' && parsed !== null) {
+                return parsed;
+            }
+            return {};
+        } catch (e) {
+            console.warn('Erro ao ler ranking:', e);
+            return {};
+        }
     }
 
     function saveRanking(ranking) {
-        localStorage.setItem('musicRanking', JSON.stringify(ranking));
+        try {
+            localStorage.setItem('musicRanking', JSON.stringify(ranking));
+        } catch (e) {
+            console.warn('Erro ao salvar ranking:', e);
+        }
     }
 
-    // Se o ranking estiver vazio, popula com valores iniciais altos
+    // Popula com dados falsos apenas se o ranking estiver vazio
     function initRankingWithFakeData() {
         const ranking = getRanking();
         if (Object.keys(ranking).length === 0) {
@@ -693,7 +707,12 @@
                 'Fé||Marcelo Hacker': 1120,
                 'Rei da Guerra||Marcelo Hacker': 890,
                 'Vida Loka||Marcelo Hacker': 670,
-                'Poesia Acústica||Marcelo Hacker': 540
+                'Poesia Acústica||Marcelo Hacker': 540,
+                'O Som da Favela||Marcelo Hacker': 420,
+                'A Noite Inteira||Marcelo Hacker': 310,
+                'Coração na Mão||Marcelo Hacker': 230,
+                'Maluca||Marcelo Hacker': 180,
+                'Fim de Tarde||Marcelo Hacker': 120
             };
             saveRanking(fake);
         }
@@ -710,6 +729,7 @@
 
     function renderRanking() {
         const ranking = getRanking();
+        // Ordena por valor (decrescente) e pega os 10 primeiros
         const entries = Object.entries(ranking)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 10);
@@ -721,17 +741,21 @@
         }
 
         entries.forEach(([key, count], index) => {
-            const [song, artist] = key.split('||');
+            // Divide a chave no formato "nome||artista"
+            const parts = key.split('||');
+            const songName = parts[0] || 'Música';
+            const artistName = parts[1] || '';
+
             const li = document.createElement('li');
             const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
             li.innerHTML = `
                 <span class="rank ${rankClass}">#${index + 1}</span>
-                <span class="music-name">${song}${artist ? ' · ' + artist : ''}</span>
+                <span class="music-name">${songName}${artistName ? ' · ' + artistName : ''}</span>
                 <span class="count">${count} cliques</span>
             `;
             li.addEventListener('click', () => {
-                artistInput.value = artist || 'Marcelo Hacker';
-                songInput.value = song;
+                artistInput.value = artistName || 'Marcelo Hacker';
+                songInput.value = songName;
                 searchMusic();
             });
             rankingList.appendChild(li);
@@ -741,7 +765,6 @@
     // ========================================================================
     //  ÁLBUNS – COM CAPA BUSCADA NO ITUNES
     // ========================================================================
-    // Lista dos seus álbuns (adicione todos que quiser)
     const albumsData = [
         { name: 'Bandido Acústico', year: '2024', artist: 'Marcelo Hacker' },
         { name: 'Marcelo Hacker - EP', year: '2023', artist: 'Marcelo Hacker' },
@@ -749,7 +772,6 @@
         // Adicione mais álbuns aqui
     ];
 
-    // Busca a capa do álbum no iTunes
     async function fetchAlbumArt(albumName, artistName) {
         const query = `${albumName} ${artistName}`;
         try {
@@ -759,11 +781,10 @@
                 const album = data.results[0];
                 return album.artworkUrl100 ? album.artworkUrl100.replace('100x100', '600x600') : null;
             }
-        } catch (e) { console.warn('Erro ao buscar capa do álbum:', e); }
+        } catch (e) { /* silencioso */ }
         return null;
     }
 
-    // Renderiza os álbuns (com capas dinâmicas)
     async function renderAlbums() {
         albumGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#b3b3b3;">Carregando capas...</div>';
 
@@ -793,12 +814,10 @@
                     </div>
                 </div>
             `;
-            // Adiciona eventos para os links (buscam a música no lugar do álbum)
             div.querySelectorAll('.album-links a').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const albumName = link.dataset.album;
-                    // Abre a busca com o nome do álbum + artista
                     artistInput.value = 'Marcelo Hacker';
                     songInput.value = albumName;
                     searchMusic();
@@ -809,32 +828,23 @@
     }
 
     // ========================================================================
-    //  FUNÇÕES DE RASTREAMENTO (com Google, TikTok e Facebook)
+    //  FUNÇÕES DE RASTREAMENTO (Google, TikTok, Facebook)
     // ========================================================================
     function trackEvent(eventName, params = {}) {
         console.log(`[Analytics] ${eventName}`, params);
 
-        // Google Analytics
         if (typeof gtag === 'function') {
-            gtag('event', eventName, {
-                ...params,
-                transport: 'beacon'
-            });
+            gtag('event', eventName, { ...params, transport: 'beacon' });
         }
-
-        // TikTok Pixel
         if (typeof ttq !== 'undefined' && ttq.track) {
             ttq.track(eventName, params);
         }
-
-        // Facebook Pixel (Meta)
         if (typeof fbq === 'function') {
             fbq('trackCustom', eventName, params);
         }
     }
 
     function openTrackedLink(url, eventName, extraParams = {}) {
-        // Abre a URL imediatamente
         let newWindow = null;
         try {
             newWindow = window.open(url, '_blank', 'noopener,noreferrer');
@@ -843,12 +853,10 @@
             setTimeout(() => window.open(url, '_blank', 'noopener,noreferrer'), 100);
         }
 
-        // Incrementa ranking (se for uma música)
         if (currentSong) {
             incrementRanking(currentSong, currentArtist);
         }
 
-        // Envia evento para todos os pixels
         trackEvent(eventName, {
             ...extraParams,
             destination_url: url,
@@ -1180,8 +1188,6 @@
         loading.style.display = 'none';
 
         trackEvent('results_rendered', { musica: currentSong, artista: currentArtist });
-
-        // Atualiza o ranking
         renderRanking();
     }
 
@@ -1237,13 +1243,11 @@
     //  CARREGAMENTO INICIAL
     // ========================================================================
     window.addEventListener('load', async () => {
-        // Inicializa ranking com dados falsos (se vazio)
+        // Inicializa ranking com dados falsos se vazio
         initRankingWithFakeData();
 
-        // Renderiza álbuns (com capas do iTunes)
+        // Renderiza álbuns e ranking
         await renderAlbums();
-
-        // Renderiza ranking
         renderRanking();
 
         // Se houver parâmetros na URL, carrega direto
@@ -1256,13 +1260,9 @@
             searchMusic();
         } else {
             updateMetaTags('🎵 Marcelo Hacker', 'Ouça minhas músicas em todas as plataformas.', '');
-            // Opcional: carregar uma música padrão
-            // artistInput.value = 'Marcelo Hacker';
-            // songInput.value = 'Bandido Acústico';
-            // searchMusic();
         }
 
-        // Event listeners da busca
+        // Event listeners
         searchBtn.addEventListener('click', searchMusic);
         artistInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchMusic(); });
         songInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchMusic(); });
