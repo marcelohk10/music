@@ -45,7 +45,7 @@
         }(window, document, 'ttq');
     </script>
 
-    <!-- ===== FACEBOOK PIXEL (META) ===== -->
+    <!-- ===== FACEBOOK PIXEL ===== -->
     <script>
         !function(f,b,e,v,n,t,s)
         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -91,7 +91,7 @@
             animation: fadeUp 0.5s ease forwards;
         }
 
-        /* ===== CARDS E SUPERFÍCIES ===== */
+        /* ===== CARDS ===== */
         .card {
             background: #181818;
             border-radius: 16px;
@@ -102,12 +102,6 @@
         }
         .card:hover {
             transform: scale(1.01);
-        }
-        .glass {
-            background: rgba(30,30,30,0.7);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border: 1px solid #2a2a2a;
         }
 
         /* ===== HEADER ===== */
@@ -226,7 +220,7 @@
             transform: scale(0.95);
         }
 
-        /* ===== BOTÕES DAS PLATAFORMAS ===== */
+        /* ===== BOTÕES PLATAFORMAS ===== */
         #links-container {
             display: flex;
             flex-direction: column;
@@ -268,7 +262,6 @@
             font-size: 1.2rem;
             opacity: 0.5;
         }
-        /* Cores dos ícones */
         .spotify .platform-name::before { color: #1DB954; }
         .appleMusic .platform-name::before { color: #FA58D8; }
         .deezer .platform-name::before { color: #FEAA2D; }
@@ -278,7 +271,7 @@
         .tiktokMusic .platform-name::before { color: #FF0050; }
         .tidal .platform-name::before { color: #00ffff; }
 
-        /* ===== SOCIAL LINKS (TikTok/Instagram) ===== */
+        /* ===== SOCIAL ===== */
         #social-links-container {
             border-top: 1px solid #2a2a2a;
             padding-top: 16px;
@@ -381,7 +374,7 @@
         .share-row a.telegram { background: #0088cc; }
         .share-row a.copy-link { background: #6c757d; font-size: 1.2rem; }
 
-        /* ===== CONTADOR DE "CURTIDAS" ===== */
+        /* ===== CURTIDAS ===== */
         .like-section {
             display: flex;
             align-items: center;
@@ -422,7 +415,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== SEÇÃO ÁLBUNS E RANKING ===== */
+        /* ===== ÁLBUNS E RANKING ===== */
         .section-title {
             font-size: 1.3rem;
             font-weight: 700;
@@ -530,7 +523,6 @@
             padding: 20px 0;
         }
 
-        /* ===== RESPONSIVIDADE ===== */
         @media (max-width: 480px) {
             .card { padding: 16px; }
             .header h1 { font-size: 1.4rem; }
@@ -574,14 +566,10 @@
 
         <div class="card" id="links-card">
             <div id="links-container"></div>
-
-            <!-- Redes sociais (TikTok/Instagram) -->
             <div id="social-links-container">
                 <h3>📲 Usar esta música em seu post</h3>
                 <div id="social-buttons"></div>
             </div>
-
-            <!-- Compartilhamento rápido -->
             <div class="share-row" id="quick-share-row">
                 <a href="#" class="whatsapp" id="share-wa" title="WhatsApp">💬</a>
                 <a href="#" class="twitter" id="share-tw" title="Twitter">🐦</a>
@@ -589,29 +577,23 @@
                 <a href="#" class="telegram" id="share-tg" title="Telegram">✈️</a>
                 <a href="#" class="copy-link" id="share-copy" title="Copiar link">📋</a>
             </div>
-
-            <!-- Curtidas (gamificação) -->
             <div class="like-section">
                 <span>❤️ <span id="like-count">0</span> curtidas</span>
                 <button class="like-btn" id="like-btn">Curtir</button>
             </div>
         </div>
 
-        <!-- Embeds -->
         <div class="card" id="embed-container">
             <h3>🎧 Ouvir aqui também</h3>
             <div id="embed-content"></div>
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- ========== SEÇÕES FINAIS: ÁLBUNS E RANKING =================== -->
-    <!-- ============================================================ -->
-
+    <!-- ========== SEÇÕES FINAIS ========== -->
     <div class="card" id="albums-section">
         <div class="section-title">📀 Álbuns</div>
         <div class="album-grid" id="album-grid">
-            <!-- Preenchido via JavaScript com capas do iTunes -->
+            <!-- Preenchido via JavaScript -->
         </div>
     </div>
 
@@ -624,7 +606,7 @@
 
 <script>
     // ========================================================================
-    //  CÓDIGO PRINCIPAL – COM RANKING CORRIGIDO E CAPAS DINÂMICAS
+    //  CÓDIGO PRINCIPAL – CORRIGIDO
     // ========================================================================
 
     // ----- ELEMENTOS DOM -----
@@ -667,19 +649,17 @@
     let likeCount = parseInt(localStorage.getItem('musicLikeCount') || '0', 10);
     let liked = localStorage.getItem('musicLiked') === 'true';
 
-    // ----- INICIALIZA CONTADOR DE CURTIDAS -----
     likeCountSpan.textContent = likeCount;
     if (liked) { likeBtn.classList.add('liked'); likeBtn.textContent = '❤️ Curtido'; }
 
     // ========================================================================
-    //  RANKING COM VALORES INICIAIS ALTOS – CORRIGIDO
+    //  RANKING – CORRIGIDO (sem [object Object])
     // ========================================================================
     function getRanking() {
         try {
             const data = localStorage.getItem('musicRanking');
             if (!data) return {};
             const parsed = JSON.parse(data);
-            // Garantir que é um objeto com chaves string
             if (typeof parsed === 'object' && parsed !== null) {
                 return parsed;
             }
@@ -693,12 +673,10 @@
     function saveRanking(ranking) {
         try {
             localStorage.setItem('musicRanking', JSON.stringify(ranking));
-        } catch (e) {
-            console.warn('Erro ao salvar ranking:', e);
-        }
+        } catch (e) { /* ignora */ }
     }
 
-    // Popula com dados falsos apenas se o ranking estiver vazio
+    // Inicializa com dados falsos (nomes reais)
     function initRankingWithFakeData() {
         const ranking = getRanking();
         if (Object.keys(ranking).length === 0) {
@@ -707,7 +685,6 @@
                 'Fé||Marcelo Hacker': 1120,
                 'Rei da Guerra||Marcelo Hacker': 890,
                 'Vida Loka||Marcelo Hacker': 670,
-                'Poesia Acústica||Marcelo Hacker': 540,
                 'O Som da Favela||Marcelo Hacker': 420,
                 'A Noite Inteira||Marcelo Hacker': 310,
                 'Coração na Mão||Marcelo Hacker': 230,
@@ -729,14 +706,13 @@
 
     function renderRanking() {
         const ranking = getRanking();
-        // Ordena por valor (decrescente) e pega os 10 primeiros
         const entries = Object.entries(ranking)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 10);
 
         rankingList.innerHTML = '';
         if (entries.length === 0) {
-            rankingList.innerHTML = '<li class="ranking-empty">Nenhuma música acessada ainda. Comece ouvindo!</li>';
+            rankingList.innerHTML = '<li class="ranking-empty">Nenhuma música acessada ainda.</li>';
             return;
         }
 
@@ -763,13 +739,13 @@
     }
 
     // ========================================================================
-    //  ÁLBUNS – COM CAPA BUSCADA NO ITUNES
+    //  ÁLBUNS – AGORA VOCÊ MESMO PREENCHE (vazio por padrão)
     // ========================================================================
+    // 🔽 COLOQUE AQUI OS SEUS ÁLBUNS (exemplo abaixo, remova ou edite)
     const albumsData = [
-        { name: 'Bandido Acústico', year: '2024', artist: 'Marcelo Hacker' },
-        { name: 'Marcelo Hacker - EP', year: '2023', artist: 'Marcelo Hacker' },
-        { name: 'Poesia Acústica', year: '2022', artist: 'Marcelo Hacker' },
-        // Adicione mais álbuns aqui
+        // Exemplo:
+        // { name: 'Bandido Acústico', year: '2024', artist: 'Marcelo Hacker' },
+        // { name: 'Marcelo Hacker - EP', year: '2023', artist: 'Marcelo Hacker' }
     ];
 
     async function fetchAlbumArt(albumName, artistName) {
@@ -786,6 +762,11 @@
     }
 
     async function renderAlbums() {
+        if (albumsData.length === 0) {
+            albumGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#b3b3b3;padding:20px 0;">Nenhum álbum cadastrado ainda.</div>';
+            return;
+        }
+
         albumGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#b3b3b3;">Carregando capas...</div>';
 
         const albumPromises = albumsData.map(async (album) => {
@@ -828,11 +809,9 @@
     }
 
     // ========================================================================
-    //  FUNÇÕES DE RASTREAMENTO (Google, TikTok, Facebook)
+    //  RASTREAMENTO (Google, TikTok, Facebook)
     // ========================================================================
     function trackEvent(eventName, params = {}) {
-        console.log(`[Analytics] ${eventName}`, params);
-
         if (typeof gtag === 'function') {
             gtag('event', eventName, { ...params, transport: 'beacon' });
         }
@@ -852,11 +831,9 @@
         if (!newWindow) {
             setTimeout(() => window.open(url, '_blank', 'noopener,noreferrer'), 100);
         }
-
         if (currentSong) {
             incrementRanking(currentSong, currentArtist);
         }
-
         trackEvent(eventName, {
             ...extraParams,
             destination_url: url,
@@ -867,18 +844,18 @@
     }
 
     // ========================================================================
-    //  FUNÇÕES DE UI (compartilhamento, meta tags, etc.)
+    //  UI (meta tags, compartilhamento, embeds, etc.)
     // ========================================================================
     function updateMetaTags(title, description, image) {
-        let ogTitle = document.querySelector('meta[property="og:title"]');
-        let ogDesc = document.querySelector('meta[property="og:description"]');
-        let ogImage = document.querySelector('meta[property="og:image"]');
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        const ogImage = document.querySelector('meta[property="og:image"]');
         if (ogTitle) ogTitle.setAttribute('content', title || '🎵 Marcelo Hacker');
         if (ogDesc) ogDesc.setAttribute('content', description || 'Ouça agora');
         if (ogImage && image) ogImage.setAttribute('content', image);
-        let twTitle = document.querySelector('meta[name="twitter:title"]');
-        let twDesc = document.querySelector('meta[name="twitter:description"]');
-        let twImage = document.querySelector('meta[name="twitter:image"]');
+        const twTitle = document.querySelector('meta[name="twitter:title"]');
+        const twDesc = document.querySelector('meta[name="twitter:description"]');
+        const twImage = document.querySelector('meta[name="twitter:image"]');
         if (twTitle) twTitle.setAttribute('content', title || '🎵 Marcelo Hacker');
         if (twDesc) twDesc.setAttribute('content', description || 'Ouça agora');
         if (twImage && image) twImage.setAttribute('content', image);
@@ -941,9 +918,6 @@
         });
     }
 
-    // ========================================================================
-    //  EMBEDS (YouTube + SoundCloud)
-    // ========================================================================
     function renderEmbeds() {
         embedContent.innerHTML = '';
         const youtubeId = youtubeIdParam || extractYouTubeId(youtubeUrlParam);
@@ -1043,7 +1017,7 @@
     }
 
     // ========================================================================
-    //  BUSCA PRINCIPAL (iTunes, Deezer, etc.)
+    //  BUSCA PRINCIPAL
     // ========================================================================
     async function searchMusic() {
         const artist = artistInput.value.trim() || currentArtist;
@@ -1098,7 +1072,6 @@
             songArtist.textContent = artist;
         }
 
-        // 2. Artwork da URL
         if (!artwork.style.display || artwork.style.display === 'none') {
             if (artworkUrl) {
                 artwork.src = artworkUrl;
@@ -1106,7 +1079,7 @@
             }
         }
 
-        // 3. Deezer
+        // 2. Deezer
         try {
             const deezerData = await searchDeezer(query);
             if (deezerData) {
@@ -1114,7 +1087,7 @@
             }
         } catch (e) { console.warn('Deezer error:', e); }
 
-        // 4. Plataformas fixas
+        // 3. Plataformas fixas
         const platforms = [
             { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, cls: 'spotify' },
             { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, cls: 'youtubeMusic' },
@@ -1125,13 +1098,13 @@
         ];
         platforms.forEach(p => createPlatformButton(p.name, p.url, p.cls));
 
-        // 5. Links sociais
+        // 4. Links sociais
         let hasSocial = false;
         if (tiktokUrl) { createSocialButton('🎵 Usar Som no TikTok', tiktokUrl, 'tiktok'); hasSocial = true; }
         if (instagramUrl) { createSocialButton('📸 Usar Som no Instagram', instagramUrl, 'instagram'); hasSocial = true; }
         socialLinksContainer.style.display = hasSocial ? 'block' : 'none';
 
-        // 6. Botão compartilhar
+        // 5. Compartilhar
         if (navigator.share) {
             shareBtn.style.display = 'block';
             shareBtn.textContent = '📤 Compartilhar link';
@@ -1154,7 +1127,7 @@
             };
         }
 
-        // 7. Prévia
+        // 6. Prévia
         previewBtn.onclick = () => {
             if (!currentPreviewUrl) return;
             if (!previewAudio) {
@@ -1177,16 +1150,11 @@
             }
         };
 
-        // 8. Compartilhamento rápido
         setupQuickShare();
-
-        // 9. Embeds
         renderEmbeds();
 
-        // 10. Exibir
         resultsContainer.style.display = 'block';
         loading.style.display = 'none';
-
         trackEvent('results_rendered', { musica: currentSong, artista: currentArtist });
         renderRanking();
     }
@@ -1216,7 +1184,7 @@
     }
 
     // ========================================================================
-    //  CURTIR (gamificação)
+    //  CURTIR
     // ========================================================================
     likeBtn.addEventListener('click', () => {
         if (!liked) {
@@ -1246,11 +1214,9 @@
         // Inicializa ranking com dados falsos se vazio
         initRankingWithFakeData();
 
-        // Renderiza álbuns e ranking
         await renderAlbums();
         renderRanking();
 
-        // Se houver parâmetros na URL, carrega direto
         if (artistaUrl && musicaUrl) {
             artistInput.value = artistaUrl;
             songInput.value = musicaUrl;
@@ -1262,7 +1228,6 @@
             updateMetaTags('🎵 Marcelo Hacker', 'Ouça minhas músicas em todas as plataformas.', '');
         }
 
-        // Event listeners
         searchBtn.addEventListener('click', searchMusic);
         artistInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchMusic(); });
         songInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') searchMusic(); });
