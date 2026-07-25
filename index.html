@@ -270,6 +270,20 @@
         .soundCloud .platform-name::before { color: #FF5500; }
         .tiktokMusic .platform-name::before { color: #FF0050; }
         .tidal .platform-name::before { color: #00ffff; }
+        .platform-btn.preferred {
+            order: -1;
+            border-color: #1DB954;
+            background: linear-gradient(90deg, rgba(29,185,84,0.14), #1e1e1e 46%);
+        }
+        .preference-badge {
+            margin-left: 8px;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: rgba(29,185,84,0.18);
+            color: #61df8d;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
 
         /* ===== SOCIAL ===== */
         #social-links-container {
@@ -344,58 +358,81 @@
             display: block;
             background: #000;
         }
+        .youtube-local-preview {
+            position: relative;
+            display: block;
+            min-height: 260px;
+            overflow: hidden;
+            background: #080808;
+            color: #fff;
+            text-decoration: none;
+        }
+        .youtube-local-preview img {
+            width: 100%;
+            height: 280px;
+            display: block;
+            object-fit: cover;
+            opacity: 0.78;
+        }
+        .youtube-local-preview span {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%);
+            padding: 12px 18px;
+            border-radius: 999px;
+            background: #ff0000;
+            font-weight: 800;
+            white-space: nowrap;
+        }
 
         /* ===== COMPARTILHAMENTO RÁPIDO ===== */
+        .share-heading {
+            margin-top: 18px;
+            color: #b3b3b3;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-align: center;
+            text-transform: uppercase;
+        }
         .share-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 16px;
+            margin-top: 10px;
         }
         .share-row a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #2a2a2a;
-            color: #fff;
-            font-size: 1.5rem;
-            text-decoration: none;
-            transition: background 0.2s, transform 0.1s;
-            cursor: pointer;
-        }
-        .share-row a:active { transform: scale(0.9); }
-        .share-row a.whatsapp { background: #25D366; }
-        .share-row a.twitter { background: #1DA1F2; }
-        .share-row a.facebook { background: #1877F2; }
-        .share-row a.telegram { background: #0088cc; }
-        .share-row a.copy-link { background: #6c757d; font-size: 1.2rem; }
-
-        /* ===== CURTIDAS ===== */
-        .like-section {
+            --brand: #8b8b8b;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 12px;
-            font-size: 0.9rem;
-            color: #b3b3b3;
+            justify-content: flex-start;
+            gap: 9px;
+            min-height: 42px;
+            padding: 9px 12px;
+            border: 1px solid #303030;
+            border-left: 3px solid var(--brand);
+            border-radius: 10px;
+            background: #202020;
+            color: #f5f5f5;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: border-color 0.2s, background 0.2s, transform 0.1s;
         }
-        .like-btn {
-            background: none;
-            border: 1px solid #444;
-            border-radius: 30px;
-            padding: 6px 16px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s;
+        .share-row a:hover { background: #292929; border-color: var(--brand); }
+        .share-row a:active { transform: scale(0.98); }
+        .share-row .share-symbol {
+            width: 22px;
+            color: var(--brand);
+            font-size: 1rem;
+            font-weight: 800;
+            text-align: center;
         }
-        .like-btn:active { background: #333; }
-        .like-btn.liked { background: #1DB954; border-color: #1DB954; }
+        .share-row a.whatsapp { --brand: #25D366; }
+        .share-row a.twitter { --brand: #e7e7e7; }
+        .share-row a.facebook { --brand: #4385f5; }
+        .share-row a.telegram { --brand: #2AABEE; }
+        .share-row a.copy-link { --brand: #1DB954; grid-column: 1 / -1; justify-content: center; }
 
         /* ===== LOADING ===== */
         #loading {
@@ -531,16 +568,13 @@
                 <h3>📲 Usar esta música em seu post</h3>
                 <div id="social-buttons"></div>
             </div>
+            <div class="share-heading">Compartilhe esta música</div>
             <div class="share-row" id="quick-share-row">
-                <a href="#" class="whatsapp" id="share-wa" title="WhatsApp">💬</a>
-                <a href="#" class="twitter" id="share-tw" title="Twitter">🐦</a>
-                <a href="#" class="facebook" id="share-fb" title="Facebook">📘</a>
-                <a href="#" class="telegram" id="share-tg" title="Telegram">✈️</a>
-                <a href="#" class="copy-link" id="share-copy" title="Copiar link">📋</a>
-            </div>
-            <div class="like-section">
-                <span>❤️ <span id="like-count">0</span> curtidas</span>
-                <button class="like-btn" id="like-btn">Curtir</button>
+                <a href="#" class="whatsapp" id="share-wa" title="Compartilhar no WhatsApp"><span class="share-symbol">●</span><span>WhatsApp</span></a>
+                <a href="#" class="twitter" id="share-tw" title="Compartilhar no X"><span class="share-symbol">𝕏</span><span>X</span></a>
+                <a href="#" class="facebook" id="share-fb" title="Compartilhar no Facebook"><span class="share-symbol">f</span><span>Facebook</span></a>
+                <a href="#" class="telegram" id="share-tg" title="Compartilhar no Telegram"><span class="share-symbol">➤</span><span>Telegram</span></a>
+                <a href="#" class="copy-link" id="share-copy" title="Copiar link"><span class="share-symbol">↗</span><span>Copiar link</span></a>
             </div>
         </div>
 
@@ -552,7 +586,7 @@
 
     <!-- ========== SEÇÃO ÁLBUNS (FIXA, SEM RANKING) ========== -->
     <div class="card" id="albums-section">
-        <div class="section-title">📀 Álbuns</div>
+        <div class="section-title">💿 Lançamentos</div>
         <div class="album-grid" id="album-grid">
             <!-- Preenchido via JavaScript com dados fixos -->
         </div>
@@ -581,14 +615,30 @@
     const embedContent = document.getElementById('embed-content');
     const shareBtn = document.getElementById('share-button');
     const previewBtn = document.getElementById('preview-button');
-    const likeBtn = document.getElementById('like-btn');
-    const likeCountSpan = document.getElementById('like-count');
     const albumGrid = document.getElementById('album-grid');
 
     // ----- PARÂMETROS DA URL -----
     const params = new URLSearchParams(window.location.search);
-    const artistaUrl = params.get('artista');
-    const musicaUrl = params.get('musica');
+
+    // Mantém acentos no nome exibido e também aceita links antigos que tenham
+    // sido codificados duas vezes (por exemplo, "Calor%25C3%25AA").
+    function normalizeUrlText(value) {
+        if (!value) return '';
+        let normalized = value;
+        if (/%[0-9a-f]{2}/i.test(normalized)) {
+            try { normalized = decodeURIComponent(normalized); } catch (e) {}
+        }
+        return normalized.normalize('NFC').replace(/[\u0000-\u001F\u007F]/g, '').trim();
+    }
+
+    // Algumas plataformas não encontram títulos acentuados. Essa versão é
+    // usada somente como segunda tentativa; o título público continua "Calorê".
+    function withoutAccents(value) {
+        return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    const artistaUrl = normalizeUrlText(params.get('artista'));
+    const musicaUrl = normalizeUrlText(params.get('musica'));
     const artworkUrl = params.get('artwork_url');
     const tiktokUrl = params.get('tiktok_url');
     const instagramUrl = params.get('ig_url');
@@ -596,44 +646,91 @@
     const youtubeUrlParam = params.get('youtube_url');
     const soundcloudUrlParam = params.get('soundcloud_url');
 
+    const knownReleases = {
+        'marcelo hacker|calore': {
+            appleCollectionId: '6793701990',
+            appleMusic: 'https://music.apple.com/br/album/calor%C3%AA-single/6793701990',
+            artwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/ad/b3/33/adb33387-3d67-5eb7-6507-35718eca0805/0.jpg/600x600bb.jpg',
+            youtubeId: '_82xxm1HBsM',
+            youtubeUrl: 'https://www.youtube.com/watch?v=_82xxm1HBsM',
+            youtubeMusic: 'https://music.youtube.com/watch?v=_82xxm1HBsM'
+        },
+        'marcelo hacker|bonita': {
+            appleCollectionId: '6784433808',
+            appleMusic: 'https://music.apple.com/br/album/bonita-bonita/6784433808?i=6784433929',
+            artwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/3f/d0/f1/3fd0f152-dec1-dd6e-117d-b964d56ac718/0.jpg/600x600bb.jpg',
+            youtubeId: 'dCD8mVvLs9w',
+            youtubeUrl: 'https://www.youtube.com/watch?v=dCD8mVvLs9w',
+            youtubeMusic: 'https://music.youtube.com/watch?v=dCD8mVvLs9w'
+        },
+        'marcelo hacker|bonita bonita': {
+            appleCollectionId: '6784433808',
+            appleMusic: 'https://music.apple.com/br/album/bonita-bonita/6784433808?i=6784433929',
+            artwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/3f/d0/f1/3fd0f152-dec1-dd6e-117d-b964d56ac718/0.jpg/600x600bb.jpg',
+            youtubeId: 'dCD8mVvLs9w',
+            youtubeUrl: 'https://www.youtube.com/watch?v=dCD8mVvLs9w',
+            youtubeMusic: 'https://music.youtube.com/watch?v=dCD8mVvLs9w'
+        },
+        'marcelo hacker|bandido acustico': {
+            appleCollectionId: '6768765444',
+            appleMusic: 'https://music.apple.com/br/album/bandido-acustico/6768765444?i=6768765445',
+            artwork: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/14/cd/5f/14cd5fe1-5e4f-8b88-d6b3-b0ddcc65770a/0.jpg/600x600bb.jpg',
+            youtubeId: 'kq7rOUd-6ys',
+            youtubeUrl: 'https://www.youtube.com/watch?v=kq7rOUd-6ys',
+            youtubeMusic: 'https://music.youtube.com/watch?v=kq7rOUd-6ys'
+        }
+    };
+
+    function getKnownRelease(artist, song) {
+        const key = withoutAccents(`${artist}|${song}`)
+            .toLocaleLowerCase('pt-BR')
+            .replace(/\s+/g, ' ')
+            .trim();
+        return knownReleases[key] || null;
+    }
+
     // ----- ESTADO -----
     let currentArtist = '';
     let currentSong = '';
     let currentPreviewUrl = '';
     let previewAudio = null;
-    let likeCount = parseInt(localStorage.getItem('musicLikeCount') || '0', 10);
-    let liked = localStorage.getItem('musicLiked') === 'true';
-
-    likeCountSpan.textContent = likeCount;
-    if (liked) { likeBtn.classList.add('liked'); likeBtn.textContent = '❤️ Curtido'; }
 
     // ========================================================================
-    //  ÁLBUNS FIXOS DO MARCELO HACKER (PREENCHE AQUI)
+    //  LANÇAMENTOS REAIS DO MARCELO HACKER
     // ========================================================================
     const albumsData = [
         {
-            name: 'Bandido Acústico',
-            year: '2024',
-            cover: 'https://marcelohk10.github.io/music/covers/bandido-acustico.jpg', // ← substitua pela URL real
+            name: 'Calorê',
+            year: '2026 · Novo single',
+            cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/ad/b3/33/adb33387-3d67-5eb7-6507-35718eca0805/0.jpg/600x600bb.jpg',
             links: {
-                spotify: 'https://open.spotify.com/album/...',  // ← coloque o link real
-                apple: 'https://music.apple.com/...',
-                youtube: 'https://music.youtube.com/...',
-                deezer: 'https://www.deezer.com/...'
+                spotify: 'https://open.spotify.com/search/Marcelo%20Hacker%20Calor%C3%AA',
+                apple: 'https://music.apple.com/br/album/calor%C3%AA/6793701990?i=6793701992',
+                youtube: 'https://www.youtube.com/watch?v=_82xxm1HBsM'
             }
         },
         {
-            name: 'Marcelo Hacker - EP',
-            year: '2023',
-            cover: 'https://marcelohk10.github.io/music/covers/ep.jpg',
+            name: 'Bonita Bonita',
+            year: '2026',
+            cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/3f/d0/f1/3fd0f152-dec1-dd6e-117d-b964d56ac718/0.jpg/600x600bb.jpg',
             links: {
-                spotify: 'https://open.spotify.com/album/...',
-                apple: 'https://music.apple.com/...',
-                youtube: 'https://music.youtube.com/...',
-                deezer: 'https://www.deezer.com/...'
+                spotify: 'https://open.spotify.com/search/Marcelo%20Hacker%20Bonita%20Bonita',
+                apple: 'https://music.apple.com/br/album/bonita-bonita/6784433808?i=6784433929',
+                youtube: 'https://www.youtube.com/watch?v=dCD8mVvLs9w',
+                deezer: 'https://www.deezer.com/track/4114185331'
+            }
+        },
+        {
+            name: 'Bandido Acustico',
+            year: '2026',
+            cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/14/cd/5f/14cd5fe1-5e4f-8b88-d6b3-b0ddcc65770a/0.jpg/600x600bb.jpg',
+            links: {
+                spotify: 'https://open.spotify.com/search/Marcelo%20Hacker%20Bandido%20Acustico',
+                apple: 'https://music.apple.com/br/album/bandido-acustico/6768765444?i=6768765445',
+                youtube: 'https://www.youtube.com/watch?v=kq7rOUd-6ys',
+                deezer: 'https://www.deezer.com/track/4025214121'
             }
         }
-        // Adicione mais álbuns aqui seguindo o mesmo formato
     ];
 
     // ========================================================================
@@ -649,18 +746,18 @@
         albumsData.forEach(album => {
             const div = document.createElement('div');
             div.className = 'album-card';
-            const coverSrc = album.cover || 'https://via.placeholder.com/600/181818/FFFFFF?text=No+Cover';
+            const coverSrc = album.cover || 'default-cover.jpg';
             div.innerHTML = `
                 <img src="${coverSrc}" alt="${album.name}" 
-                     onerror="this.src='https://via.placeholder.com/600/181818/FFFFFF?text=No+Cover'" />
+                     onerror="this.onerror=null;this.src='default-cover.jpg'" />
                 <div class="album-info">
                     <div class="album-name">${album.name}</div>
                     <div class="album-year">${album.year || ''}</div>
                     <div class="album-links">
-                        ${album.links.spotify ? `<a href="${album.links.spotify}" target="_blank" class="spotify">Spotify</a>` : ''}
-                        ${album.links.apple ? `<a href="${album.links.apple}" target="_blank" class="apple">Apple</a>` : ''}
-                        ${album.links.youtube ? `<a href="${album.links.youtube}" target="_blank" class="youtube">YouTube</a>` : ''}
-                        ${album.links.deezer ? `<a href="${album.links.deezer}" target="_blank" class="deezer">Deezer</a>` : ''}
+                        ${album.links.spotify ? `<a href="${album.links.spotify}" target="_blank" rel="noopener noreferrer" class="spotify">Spotify</a>` : ''}
+                        ${album.links.apple ? `<a href="${album.links.apple}" target="_blank" rel="noopener noreferrer" class="apple">Apple</a>` : ''}
+                        ${album.links.youtube ? `<a href="${album.links.youtube}" target="_blank" rel="noopener noreferrer" class="youtube">YouTube</a>` : ''}
+                        ${album.links.deezer ? `<a href="${album.links.deezer}" target="_blank" rel="noopener noreferrer" class="deezer">Deezer</a>` : ''}
                     </div>
                 </div>
             `;
@@ -719,6 +816,16 @@
         document.title = title || '🎵 Marcelo Hacker';
     }
 
+    function showArtwork(src) {
+        const fallback = new URL('default-cover.jpg', window.location.href).href;
+        artwork.onerror = () => {
+            artwork.onerror = null;
+            artwork.src = fallback;
+        };
+        artwork.src = src || fallback;
+        artwork.style.display = 'block';
+    }
+
     function getShareUrl() {
         const base = 'https://marcelohk10.github.io/music/';
         const p = new URLSearchParams();
@@ -752,12 +859,13 @@
         document.getElementById('share-tg').href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
 
         const copyBtn = document.getElementById('share-copy');
+        const copyLabel = copyBtn.querySelector('span:last-child');
         copyBtn.addEventListener('click', (e) => {
             e.preventDefault();
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(shareUrl).then(() => {
-                    copyBtn.textContent = '✅';
-                    setTimeout(() => copyBtn.textContent = '📋', 2000);
+                    if (copyLabel) copyLabel.textContent = 'Copiado!';
+                    setTimeout(() => { if (copyLabel) copyLabel.textContent = 'Copiar link'; }, 2000);
                     trackEvent('click_share', { link_tipo: 'Copiar link rápido', musica: currentSong });
                 });
             } else {
@@ -775,9 +883,9 @@
         });
     }
 
-    function renderEmbeds() {
+    function renderEmbeds(release = null) {
         embedContent.innerHTML = '';
-        const youtubeId = youtubeIdParam || extractYouTubeId(youtubeUrlParam);
+        const youtubeId = youtubeIdParam || extractYouTubeId(youtubeUrlParam) || (release && release.youtubeId);
         const hasYt = Boolean(youtubeId);
         const hasSc = Boolean(soundcloudUrlParam);
 
@@ -788,24 +896,20 @@
 
         if (hasYt) {
             const card = document.createElement('div');
+            const youtubeUrl = 'https://www.youtube.com/watch?v=' + youtubeId;
             card.className = 'embed-card';
-            card.innerHTML = `
-                <div class="embed-header">
-                    <span>▶ YouTube</span>
-                    <a href="https://www.youtube.com/watch?v=${youtubeId}" target="_blank">Abrir ↗</a>
-                </div>
-                <iframe class="embed-frame" height="280" src="https://www.youtube.com/embed/${youtubeId}" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen loading="lazy"></iframe>
-            `;
+            const youtubeBody = window.location.protocol === 'file:'
+                ? '<a class="youtube-local-preview" href="' + youtubeUrl + '" target="_blank" rel="noopener noreferrer"><img src="https://i.ytimg.com/vi/' + youtubeId + '/hqdefault.jpg" alt="Capa do vídeo oficial"><span>▶ Assistir vídeo oficial</span></a>'
+                : '<iframe class="embed-frame" height="280" src="https://www.youtube.com/embed/' + youtubeId + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+            card.innerHTML = '<div class="embed-header"><span>▶ YouTube</span><a href="' + youtubeUrl + '" target="_blank" rel="noopener noreferrer">Abrir ↗</a></div>' + youtubeBody;
             embedContent.appendChild(card);
-            card.querySelector('a').addEventListener('click', (e) => {
-                e.preventDefault();
-                const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-                openTrackedLink(url, 'click_youtube', { link_tipo: 'Abrir YouTube embed' });
+            card.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openTrackedLink(youtubeUrl, 'click_youtube', { link_tipo: 'Abrir YouTube embed' });
+                });
             });
         }
-
         if (hasSc) {
             const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(soundcloudUrlParam)}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&visual=true`;
             const card = document.createElement('div');
@@ -840,13 +944,53 @@
     // ========================================================================
     //  BOTÕES DAS PLATAFORMAS E SOCIAIS
     // ========================================================================
+    const STREAMING_PREFERENCE_KEY = 'preferredStreaming';
+    const STREAMING_PREFERENCE_TTL = 90 * 24 * 60 * 60 * 1000;
+
+    function getPreferredStreaming() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(STREAMING_PREFERENCE_KEY) || 'null');
+            if (!saved || !saved.name || Date.now() - saved.savedAt > STREAMING_PREFERENCE_TTL) {
+                localStorage.removeItem(STREAMING_PREFERENCE_KEY);
+                return '';
+            }
+            return saved.name;
+        } catch (e) { return ''; }
+    }
+
+    function markPreferredPlatform(name) {
+        document.querySelectorAll('.platform-btn').forEach(button => {
+            const selected = button.dataset.platform === name;
+            button.classList.toggle('preferred', selected);
+            const label = button.querySelector('.platform-name');
+            const currentBadge = label && label.querySelector('.preference-badge');
+            if (selected && label && !currentBadge) {
+                const badge = document.createElement('span');
+                badge.className = 'preference-badge';
+                badge.textContent = 'Sua preferência';
+                label.appendChild(badge);
+            } else if (!selected && currentBadge) {
+                currentBadge.remove();
+            }
+        });
+    }
+
+    function rememberPreferredStreaming(name) {
+        try {
+            localStorage.setItem(STREAMING_PREFERENCE_KEY, JSON.stringify({ name, savedAt: Date.now() }));
+        } catch (e) {}
+        markPreferredPlatform(name);
+    }
+
     function createPlatformButton(name, url, cssClass) {
         const a = document.createElement('a');
-        a.className = `platform-btn ${cssClass}`;
-        a.innerHTML = `<span class="platform-name">${name}</span><span class="click-arrow">➜</span>`;
+        a.className = 'platform-btn ' + cssClass;
+        a.dataset.platform = name;
+        a.innerHTML = '<span class="platform-name">' + name + '</span><span class="click-arrow">➜</span>';
         a.href = '#';
         a.addEventListener('click', (e) => {
             e.preventDefault();
+            rememberPreferredStreaming(name);
             openTrackedLink(url, 'click_streaming', {
                 link_tipo: name,
                 plataforma: name,
@@ -855,8 +999,8 @@
             });
         });
         linksContainer.appendChild(a);
+        if (getPreferredStreaming() === name) markPreferredPlatform(name);
     }
-
     function createSocialButton(text, url, cssClass) {
         const a = document.createElement('a');
         a.className = `social-btn ${cssClass}`;
@@ -886,6 +1030,7 @@
 
         currentArtist = artist;
         currentSong = song;
+        const knownRelease = getKnownRelease(artist, song);
         loading.style.display = 'block';
         resultsContainer.style.display = 'none';
         linksContainer.innerHTML = '';
@@ -896,18 +1041,28 @@
         if (previewAudio) { previewAudio.pause(); previewAudio = null; }
         currentPreviewUrl = '';
 
-        const query = `${artist} ${song}`;
+        if (knownRelease && knownRelease.artwork) {
+            showArtwork(knownRelease.artwork);
+            updateMetaTags(song, `${artist} - Ouça agora`, knownRelease.artwork);
+        }
+
+        const query = `${artist} ${song}`.normalize('NFC');
+        const fallbackQuery = withoutAccents(query);
         trackEvent('search_submitted', { artista: artist, musica: song, query });
 
         // 1. iTunes
+        let appleButtonAdded = false;
         try {
-            const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR`);
-            const data = await resp.json();
+            let data = knownRelease && knownRelease.appleCollectionId
+                ? await lookupItunes(knownRelease.appleCollectionId)
+                : await searchItunes(query);
+            if ((!data.results || !data.results.length) && fallbackQuery !== query) {
+                data = await searchItunes(fallbackQuery);
+            }
             if (data.results && data.results.length) {
-                const track = data.results[0];
+                const track = data.results.find(item => item.wrapperType === 'track') || data.results[0];
                 if (track.artworkUrl100) {
-                    artwork.src = track.artworkUrl100.replace('100x100', '300x300');
-                    artwork.style.display = 'block';
+                    showArtwork(track.artworkUrl100.replace('100x100', '300x300'));
                     updateMetaTags(track.trackName, `${track.artistName} - Ouça agora`, artwork.src);
                 }
                 songTitle.textContent = track.trackName || song;
@@ -917,7 +1072,11 @@
                     previewBtn.style.display = 'block';
                     previewBtn.textContent = '▶ Ouvir prévia';
                 }
-                createPlatformButton('Apple Music', track.trackViewUrl, 'appleMusic');
+                const appleUrl = track.trackViewUrl || (knownRelease && knownRelease.appleMusic);
+                if (appleUrl) {
+                    createPlatformButton('Apple Music', appleUrl, 'appleMusic');
+                    appleButtonAdded = true;
+                }
             } else {
                 songTitle.textContent = song;
                 songArtist.textContent = artist;
@@ -929,25 +1088,45 @@
             songArtist.textContent = artist;
         }
 
+        if (!appleButtonAdded && knownRelease && knownRelease.appleMusic) {
+            createPlatformButton('Apple Music', knownRelease.appleMusic, 'appleMusic');
+        }
+
         if (!artwork.style.display || artwork.style.display === 'none') {
             if (artworkUrl) {
-                artwork.src = artworkUrl;
-                artwork.style.display = 'block';
+                showArtwork(artworkUrl);
             }
         }
 
         // 2. Deezer
         try {
-            const deezerData = await searchDeezer(query);
+            let deezerData = await searchDeezer(query);
+            if (!deezerData && fallbackQuery !== query) {
+                deezerData = await searchDeezer(fallbackQuery);
+            }
             if (deezerData) {
+                if ((!artwork.style.display || artwork.style.display === 'none') && deezerData.album) {
+                    showArtwork(deezerData.album.cover_big || deezerData.album.cover_medium);
+                    updateMetaTags(song, `${artist} - Ouça agora`, artwork.src);
+                }
+                if (!currentPreviewUrl && deezerData.preview) {
+                    currentPreviewUrl = deezerData.preview;
+                    previewBtn.style.display = 'block';
+                    previewBtn.textContent = '▶ Ouvir prévia';
+                }
                 createPlatformButton('Deezer', deezerData.link, 'deezer');
             }
         } catch (e) { console.warn('Deezer error:', e); }
 
+        if (!artwork.style.display || artwork.style.display === 'none') {
+            showArtwork('');
+            updateMetaTags(song, `${artist} - Ouça agora`, artwork.src);
+        }
+
         // 3. Plataformas fixas
         const platforms = [
             { name: 'Spotify', url: `https://open.spotify.com/search/${encodeURIComponent(query)}`, cls: 'spotify' },
-            { name: 'YouTube Music', url: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, cls: 'youtubeMusic' },
+            { name: 'YouTube Music', url: (knownRelease && knownRelease.youtubeMusic) || `https://music.youtube.com/search?q=${encodeURIComponent(query)}`, cls: 'youtubeMusic' },
             { name: 'TikTok Music', url: `https://www.tiktok.com/search/music?q=${encodeURIComponent(query)}`, cls: 'tiktokMusic' },
             { name: 'Amazon Music', url: `https://music.amazon.com.br/search/${encodeURIComponent(query)}`, cls: 'amazonMusic' },
             { name: 'SoundCloud', url: `https://soundcloud.com/search/sounds?q=${encodeURIComponent(query)}`, cls: 'soundCloud' },
@@ -1008,14 +1187,58 @@
         };
 
         setupQuickShare();
-        renderEmbeds();
+        renderEmbeds(knownRelease);
 
         resultsContainer.style.display = 'block';
         loading.style.display = 'none';
         trackEvent('results_rendered', { musica: currentSong, artista: currentArtist });
     }
 
-    // ----- DEEZER (JSONP) -----
+    // ----- ITUNES E DEEZER (JSONP: funciona também no HTML local) -----
+    function searchItunes(query) {
+        return new Promise((resolve) => {
+            const callback = 'itunesCb' + Date.now();
+            const script = document.createElement('script');
+            let finished = false;
+
+            function finish(data) {
+                if (finished) return;
+                finished = true;
+                try { document.body.removeChild(script); } catch(e) {}
+                delete window[callback];
+                resolve(data || { results: [] });
+            }
+
+            window[callback] = finish;
+            script.src = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1&country=BR&callback=${callback}`;
+            script.onerror = () => finish({ results: [] });
+            document.body.appendChild(script);
+            setTimeout(() => finish({ results: [] }), 5000);
+        });
+    }
+
+    function lookupItunes(collectionId) {
+        return new Promise((resolve) => {
+            const callback = 'itunesLookupCb' + Date.now();
+            const script = document.createElement('script');
+            let finished = false;
+
+            function finish(data) {
+                if (finished) return;
+                finished = true;
+                try { document.body.removeChild(script); } catch(e) {}
+                delete window[callback];
+                resolve(data || { results: [] });
+            }
+
+            window[callback] = finish;
+            script.src = `https://itunes.apple.com/lookup?id=${encodeURIComponent(collectionId)}&entity=song&country=BR&callback=${callback}`;
+            script.onerror = () => finish({ results: [] });
+            document.body.appendChild(script);
+            setTimeout(() => finish({ results: [] }), 5000);
+        });
+    }
+
     function searchDeezer(query) {
         return new Promise((resolve, reject) => {
             const callback = 'deezerCb' + Date.now();
@@ -1038,30 +1261,6 @@
             }, 4000);
         });
     }
-
-    // ========================================================================
-    //  CURTIR
-    // ========================================================================
-    likeBtn.addEventListener('click', () => {
-        if (!liked) {
-            liked = true;
-            likeCount++;
-            localStorage.setItem('musicLikeCount', String(likeCount));
-            localStorage.setItem('musicLiked', 'true');
-            likeCountSpan.textContent = likeCount;
-            likeBtn.textContent = '❤️ Curtido';
-            likeBtn.classList.add('liked');
-            trackEvent('like_music', { musica: currentSong, artista: currentArtist });
-        } else {
-            liked = false;
-            likeCount--;
-            localStorage.setItem('musicLikeCount', String(likeCount));
-            localStorage.setItem('musicLiked', 'false');
-            likeCountSpan.textContent = likeCount;
-            likeBtn.textContent = 'Curtir';
-            likeBtn.classList.remove('liked');
-        }
-    });
 
     // ========================================================================
     //  CARREGAMENTO INICIAL
