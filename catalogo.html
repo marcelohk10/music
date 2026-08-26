@@ -59,7 +59,9 @@
     .brand { text-decoration:none; font-size:.9rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
     .back { color:var(--muted); text-decoration:none; font-size:.92rem; border:1px solid var(--line); padding:9px 13px; border-radius:99px; }
     .back:hover { color:#fff; border-color:rgba(255,255,255,.3); }
-    .hero { min-height:425px; display:flex; align-items:center; padding:45px 0 70px; }
+    .hero-banner { display:block; width:100%; max-height:430px; object-fit:cover; border-radius:24px; margin:10px 0 25px; border:1px solid var(--line); box-shadow:0 18px 50px rgba(0,0,0,.35); }
+    .hero { min-height:425px; display:grid; grid-template-columns:minmax(0,1fr) 310px; gap:44px; align-items:center; padding:45px 0 70px; }
+    .hero-art { width:min(100%,310px); justify-self:end; border-radius:28px; box-shadow:0 22px 55px rgba(0,0,0,.42); transform:rotate(2deg); }
     .eyebrow { color:#ff91c5; font-weight:800; letter-spacing:.14em; text-transform:uppercase; font-size:.74rem; }
     h1 { max-width:850px; margin:13px 0 18px; font-size:clamp(3rem,8vw,6.8rem); letter-spacing:-.075em; line-height:.9; }
     .hero p { max-width:610px; color:#cac7d0; font-size:clamp(1.05rem,2vw,1.3rem); }
@@ -110,7 +112,7 @@
     .full-lyric .chorus { color:#fff; font-weight:750; }
     .note { margin-top:18px; color:#85818d; font-size:.88rem; }
     footer { border-top:1px solid var(--line); padding:32px 0 45px; color:#918d98; font-size:.9rem; }
-    @media (max-width:760px) { .grid { grid-template-columns:1fr; } .lyrics { grid-template-columns:1fr; } .hero { min-height:380px; } }
+    @media (max-width:760px) { .grid { grid-template-columns:1fr; } .lyrics { grid-template-columns:1fr; } .hero { min-height:380px; grid-template-columns:1fr; gap:25px; } .hero-art { width:min(100%,245px); justify-self:start; order:-1; } }
   </style>
 </head>
 <body>
@@ -119,6 +121,7 @@
       <a class="brand" href="index.html">Marcelo Hacker</a>
       <a class="back" href="index.html">← Ouvir agora</a>
     </nav>
+    <img class="hero-banner" src="marcelo-hacker-banner.png" alt="Banner Marcelo Hacker com o personagem, músicas e identidade visual do artista">
     <main>
       <header class="hero">
         <div>
@@ -146,6 +149,7 @@
             <a href="https://www.deezer.com/br/playlist/15449490801" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(105deg,#9e7bff,#5940c8);color:#fff;">↔ Playlist reversa no Deezer</a>
           </div>
         </div>
+        <img class="hero-art" src="marcelo-hacker-avatar.png" alt="Personagem Marcelo Hacker com seu papagaio azul e um laptop">
       </header>
       <section id="lancamentos">
         <div class="eyebrow">Discografia</div>
