@@ -94,8 +94,12 @@
     .listen { color:var(--green); text-decoration:none; font-weight:800; }
     .listen:hover { color:#8df5b5; }
     .catalog { columns:3 210px; column-gap:18px; }
+    .track-row { break-inside:avoid; display:flex; gap:6px; margin:0 0 8px; }
+    .track-row > a:first-child { flex:1; margin:0; min-width:0; }
     .catalog a { display:block; break-inside:avoid; margin:0 0 8px; padding:11px 13px; border:1px solid var(--line); border-radius:11px; background:rgba(255,255,255,.035); color:#dedbe4; text-decoration:none; font-size:.92rem; transition:.18s background,.18s color; }
     .catalog a:hover { background:rgba(141,92,255,.22); color:#fff; }
+    .catalog .track-page-link { flex:0 0 auto; padding:11px 9px; color:#8df5b5; font-size:.75rem; white-space:nowrap; }
+    .catalog .track-page-link:hover { color:#fff; background:rgba(69,220,131,.18); }
     .embed-player { display:none; margin:0 0 26px; overflow:hidden; border:1px solid var(--line); border-radius:20px; background:#111116; box-shadow:0 20px 45px rgba(0,0,0,.35); }
     .embed-player.is-open { display:block; }
     .embed-player-head { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:13px 16px; color:#ded9e3; font-weight:750; }
@@ -311,6 +315,20 @@ Calorêê lá, calorêêê lá calorê lá. E calorê, e calor.</p>
       const title = document.getElementById('youtube-player-title');
       const close = document.getElementById('close-youtube-player');
       const dedicated = document.getElementById('dedicated-song-link');
+      document.querySelectorAll('.catalog > a[href*="youtube.com/watch"]').forEach((link) => {
+        const id = new URL(link.href).searchParams.get('v');
+        if (!id) return;
+        const row = document.createElement('div');
+        row.className = 'track-row';
+        link.parentNode.insertBefore(row, link);
+        row.appendChild(link);
+        const page = document.createElement('a');
+        page.className = 'track-page-link';
+        page.textContent = 'Página ↗';
+        page.href = `faixa.html?faixa=${encodeURIComponent(link.textContent.toLowerCase().replace(/[^a-z0-9]+/gi, '-'))}&nome=${encodeURIComponent(link.textContent)}&id=${encodeURIComponent(id)}`;
+        page.setAttribute('aria-label', `Abrir página de ${link.textContent}`);
+        row.appendChild(page);
+      });
       document.querySelectorAll('.catalog a[href*="youtube.com/watch"]').forEach((link) => {
         link.addEventListener('click', (event) => {
           const id = new URL(link.href).searchParams.get('v');
