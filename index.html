@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>🎵 Marcelo Hacker · Ouça agora</title>
+    <link id="canonical-link" rel="canonical" href="https://marcelohk10.github.io/music/" />
+    <script id="song-schema" type="application/ld+json">{"@context":"https://schema.org","@type":"MusicGroup","name":"Marcelo Hacker","url":"https://marcelohk10.github.io/music/"}</script>
 
     <!-- ===== META TAGS ===== -->
     <meta property="og:title" content="🎵 Marcelo Hacker · Ouça agora" />
@@ -811,9 +813,36 @@
         const twTitle = document.querySelector('meta[name="twitter:title"]');
         const twDesc = document.querySelector('meta[name="twitter:description"]');
         const twImage = document.querySelector('meta[name="twitter:image"]');
+        const ogUrl = document.querySelector('meta[property="og:url"]');
         if (twTitle) twTitle.setAttribute('content', title || '🎵 Marcelo Hacker');
         if (twDesc) twDesc.setAttribute('content', description || 'Ouça agora');
         if (twImage && image) twImage.setAttribute('content', image);
+        const canonicalBase = 'https://marcelohk10.github.io/music/index.html';
+        const hasSong = Boolean(currentArtist && currentSong);
+        const canonicalUrl = hasSong
+            ? `${canonicalBase}?artista=${encodeURIComponent(currentArtist)}&musica=${encodeURIComponent(currentSong)}`
+            : 'https://marcelohk10.github.io/music/';
+        const canonical = document.getElementById('canonical-link');
+        if (canonical) canonical.setAttribute('href', canonicalUrl);
+        if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
+        const schema = document.getElementById('song-schema');
+        if (schema) {
+            const data = hasSong ? {
+                '@context': 'https://schema.org',
+                '@type': 'MusicRecording',
+                name: currentSong,
+                byArtist: { '@type': 'MusicGroup', name: currentArtist },
+                url: canonicalUrl,
+                image: image || 'https://marcelohk10.github.io/music/default-cover.jpg',
+                inLanguage: 'pt-BR'
+            } : {
+                '@context': 'https://schema.org',
+                '@type': 'MusicGroup',
+                name: 'Marcelo Hacker',
+                url: 'https://marcelohk10.github.io/music/'
+            };
+            schema.textContent = JSON.stringify(data);
+        }
         document.title = title || '🎵 Marcelo Hacker';
     }
 
