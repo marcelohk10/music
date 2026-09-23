@@ -1305,6 +1305,27 @@
             currentArtist = artistaUrl;
             currentSong = musicaUrl;
             document.getElementById('search-box').style.display = 'none';
+
+            // Registra a entrada pela página dedicada da música. Estes eventos
+            // existiam na versão anterior e são a base histórica do relatório
+            // song_landing_view; mantê-los evita perder a medição de landing.
+            trackEvent('page_view_song', {
+                musica: `${artistaUrl} ${musicaUrl}`,
+                artista: artistaUrl,
+                source: 'url'
+            });
+            trackEvent('song_landing_view', {
+                musica: `${artistaUrl} ${musicaUrl}`,
+                artista: artistaUrl,
+                musica_origem: `${artistaUrl} ${musicaUrl}`,
+                artista_origem: artistaUrl,
+                source: 'url',
+                landing_url: window.location.href,
+                has_artwork_url: Boolean(artworkUrl),
+                has_tiktok_url: Boolean(tiktokUrl),
+                has_instagram_url: Boolean(instagramUrl),
+                has_youtube_url: Boolean(youtubeIdParam || youtubeUrlParam)
+            });
             searchMusic();
         } else {
             updateMetaTags('🎵 Marcelo Hacker', 'Ouça minhas músicas em todas as plataformas.', '');
