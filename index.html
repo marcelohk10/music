@@ -1366,3 +1366,21 @@
   }));
 })();
 </script>
+<script>
+(function(){
+  function addDeezer(){
+    var c=document.querySelector('[data-campaign-cta="bonita-bonita"]');
+    if(!c) return;
+    var row=c.querySelector('div');
+    if(!row || row.querySelector('[data-platform="Deezer"]')) return;
+    var a=document.createElement('a');
+    a.href='https://www.deezer.com/track/4114185331';
+    a.target='_blank'; a.rel='noopener noreferrer'; a.dataset.platform='Deezer';
+    a.textContent='▶ Deezer';
+    a.style.cssText='display:inline-flex;align-items:center;min-height:44px;padding:0 15px;border-radius:999px;background:#feaa2d;color:#111;text-decoration:none;font-weight:800';
+    a.addEventListener('click',function(){ if(typeof trackEvent==='function') trackEvent('click_streaming',{link_tipo:'Deezer',plataforma:'Deezer',musica:'Bonita Bonita',artista:'Marcelo Hacker',cta_position:'campaign_top'}); });
+    row.appendChild(a);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addDeezer); else addDeezer();
+})();
+</script>
